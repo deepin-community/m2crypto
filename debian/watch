@@ -1,0 +1,2 @@
+version=4
+https://gitlab.com/m2crypto/m2crypto/tags?sort=updated_desc archive/@ANY_VERSION@/m2crypto-\d\S*@ARCHIVE_EXT@

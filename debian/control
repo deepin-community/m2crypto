@@ -1,0 +1,65 @@
+Source: m2crypto
+Section: python
+Priority: optional
+Maintainer: Deepin Developer <deepin-dev@deepin.org>
+Uploaders: Deepin Packages Builder <packages@deepin.org>
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               libssl-dev,
+               links <!nodoc>,
+               openssl <!nocheck>,
+               python3-all-dev,
+               python3-docutils <!nodoc>,
+               python3-parameterized <!nocheck>,
+               python3-pytest <!nocheck>,
+               python3-setuptools,
+               python3-sphinx <!nodoc>,
+               swig (>= 1.3.40),
+Standards-Version: 4.5.1
+Homepage: https://gitlab.com/m2crypto/m2crypto
+#Vcs-Git
+#Vcs-Browser
+
+Package: python3-m2crypto
+Architecture: any
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         ${shlibs:Depends},
+Suggests: python-m2crypto-doc,
+Provides: m2crypto,
+          ${python3:Provides},
+Description: Python wrapper for the OpenSSL library (Python 3 modules)
+ m2crypto features the following:
+   * RSA, DSA, DH, HMACs, message digests, symmetric ciphers (including AES).
+   * SSL functionality to implement clients and servers.
+   * HTTPS extensions to Python's httplib, urllib, and xmlrpclib.
+   * Unforgeable HMAC'ing AuthCookies for web session management.
+   * FTP/TLS client and server.
+   * S/MIME.
+   * ZServerSSL: A HTTPS server for Zope.
+   * ZSmime: An S/MIME messenger for Zope.
+ .
+ This package contains the modules for the Python 3.x interpreter.
+
+Package: python-m2crypto-doc
+Section: doc
+Architecture: all
+Build-Profiles: <!nodoc>
+Depends: ${misc:Depends},
+         ${sphinxdoc:Depends},
+Suggests: python3-m2crypto,
+Breaks: m2crypto-doc (<< 0.35.2-2),
+        python-m2crypto (<< 0.27.0-6),
+Replaces: m2crypto-doc (<< 0.35.2-2),
+Description: Python wrapper for the OpenSSL library (docs)
+ m2crypto features the following:
+   * RSA, DSA, DH, HMACs, message digests, symmetric ciphers (including AES).
+   * SSL functionality to implement clients and servers.
+   * HTTPS extensions to Python's httplib, urllib, and xmlrpclib.
+   * Unforgeable HMAC'ing AuthCookies for web session management.
+   * FTP/TLS client and server.
+   * S/MIME.
+   * ZServerSSL: A HTTPS server for Zope.
+   * ZSmime: An S/MIME messenger for Zope.
+ .
+ This package contains the documentation.

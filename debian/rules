@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+export DH_VERBOSE=1
+export PYBUILD_NAME=m2crypto
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+
+export PYBUILD_TEST_ARGS=--ignore tests/test_ssl.py
+export PYBUILD_AFTER_BUILD_python3=PYTHONPATH={build_dir} http_proxy='127.0.0.1:9' python3 -m sphinx -N doc debian/python-m2crypto-doc/usr/share/doc/python-m2crypto-doc/html
+
+export http_proxy=
+export https_proxy=
+# override settings from pybuild, unset them is needed for tests
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_installdocs:
+	rst2html -r 5 README.rst .pybuild/README.html
+	LC_LANG=C.UTF-8 links -dump .pybuild/README.html > .pybuild/README
+	dh_installdocs -A .pybuild/README

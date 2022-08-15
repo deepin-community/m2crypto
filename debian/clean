@@ -1,0 +1,3 @@
+M2Crypto.egg-info/
+.pytest_cache/
+M2Crypto/*.so
