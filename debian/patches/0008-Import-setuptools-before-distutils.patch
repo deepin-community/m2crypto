@@ -1,0 +1,39 @@
+From: Stefano Rivera <stefanor@debian.org>
+Date: Sat, 12 Nov 2022 22:07:49 +0200
+Subject: Import setuptools before distutils
+
+setuptools 60 uses its own bundled version of distutils, by default. It
+injects this into sys.modules, at import time. So we need to make sure
+that it is imported, before anything else imports distutils, to ensure
+everything is using the same distutils version.
+
+This change in setuptools is to prepare for Python 3.12, which will drop
+distutils.
+
+Forwarded: https://gitlab.com/m2crypto/m2crypto/-/merge_requests/278
+Fixes: https://bugs.debian.org/1022485
+---
+ setup.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/setup.py b/setup.py
+index a1d58f2..2792fc6 100644
+--- a/setup.py
++++ b/setup.py
+@@ -22,13 +22,13 @@ import shutil
+ import subprocess
+ import sys
+ 
++import setuptools
++from setuptools.command import build_ext
++
+ from distutils.command import build
+ from distutils.command.clean import clean
+ from distutils.dir_util import mkpath
+ 
+-import setuptools
+-from setuptools.command import build_ext
+-
+ logging.basicConfig(format='%(levelname)s:%(funcName)s:%(message)s',
+                     stream=sys.stdout, level=logging.INFO)
+ log = logging.getLogger('setup')

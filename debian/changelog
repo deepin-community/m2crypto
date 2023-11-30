@@ -1,5 +1,521 @@
-m2crypto (0.38.0-deepin) stable; urgency=medium
+m2crypto (0.38.0-4.1) unstable; urgency=medium
 
-  * ['Rebuild  against by  current gcc 11.2']
+  * Non-maintainer upload.
+  * Adapt testsuite to OpenSSL 3.1 error codes (Closes: #1051795).
 
- -- Deepin Packages Builder <packages@deepin.org>  Fri, 12 Aug 2022 21:58:36 +0800
+ -- Sebastian Andrzej Siewior <sebastian@breakpoint.cc>  Tue, 17 Oct 2023 21:44:49 +0200
+
+m2crypto (0.38.0-4) unstable; urgency=high
+
+  [ Stefano Rivera ]
+  * Patch: Mitigate the Bleichenbacher timing attacks in the RSA decryption
+    API (CVE-2020-25657, Closes: #975002)
+  * Patch: Add support for setuptools >= 60. (Closes #1022485)
+
+ -- Sandro Tosi <morph@debian.org>  Wed, 16 Nov 2022 21:32:27 -0500
+
+m2crypto (0.38.0-3) unstable; urgency=medium
+
+  [ Stefano Rivera ]
+  * Load legacy provider of openssl v3, to avoid segfault in tests when
+    m2crypto tests legacy things. Thanks Dimitri John Ledkov for the patch.
+    Closes: #1006508
+  * Apply 4 patches to get the tests passing on OpenSSL 3.
+  * Skip TLSv1.0 test, no longer possible to run it.
+
+ -- Sandro Tosi <morph@debian.org>  Tue, 21 Jun 2022 00:44:57 -0400
+
+m2crypto (0.38.0-2) unstable; urgency=medium
+
+  * debian/tests/control
+    - fix autopkgtests by installing build-deps; Closes: #998028
+
+ -- Sandro Tosi <morph@debian.org>  Thu, 02 Dec 2021 23:58:52 -0500
+
+m2crypto (0.38.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * debian/watch
+    - track gitlab releases
+  * debian/patches
+    - refresh, drop merged patches
+  * debian/rules
+    - use pybuild to run test and build doc
+
+ -- Sandro Tosi <morph@debian.org>  Thu, 14 Oct 2021 23:21:43 -0400
+
+m2crypto (0.37.1-2) unstable; urgency=medium
+
+  * debian/patches/MR262.patch
+    - fix test failure with recent openssl; Closes: #983013
+  * debian/rules
+    - skip test_ssl.py during tests, more than 50% of its tests faol on an
+      IPv6-only machine; Closes: #979865
+
+ -- Sandro Tosi <morph@debian.org>  Sun, 21 Feb 2021 23:49:07 -0500
+
+m2crypto (0.37.1-1) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * d/control: Update Vcs-* fields with new Debian Python Team Salsa
+    layout.
+
+  [ Sandro Tosi ]
+  * New upstream release
+  * Use the new Debian Python Team contact name and address
+  * debian/copyright
+    - extend packaging copyright years
+  * debian/control
+    - bump Standards-Version to 4.5.1 (no changes needed)
+    - add parameterized to b-d, needed by tests
+  * debian/patches/0001-import-inspect-in-urllib-2.patch
+    - refresh patch
+  * debian/patches/MR261.patch
+    - fix compatibility with openssl/1.1.1i+; Closes: #954402
+
+ -- Sandro Tosi <morph@debian.org>  Tue, 12 Jan 2021 00:53:00 -0500
+
+m2crypto (0.36.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * debian/control
+    - add Breaks+Replaces: m2crypto-doc on -doc pkg; Closes: #959947, #964299
+    - wrap-and-sort
+    - bump compat level to 13
+  * debian/patches/{d3a43ffe1bfe4c128d6ab7c390419dee68f4ca5a.patch,
+                    d67b8e3d2682eb70248d7070d860dabe5a003d52.patch}
+    - drop patches, merged upstream
+
+ -- Sandro Tosi <morph@debian.org>  Wed, 15 Jul 2020 23:27:35 -0400
+
+m2crypto (0.35.2-2) unstable; urgency=medium
+
+  * debian/patches/d67b8e3d2682eb70248d7070d860dabe5a003d52.patch
+    - fix syntax warning; Closes: #948300
+  * rename doc package to python-m2crypto-doc, to respect policy
+
+ -- Sandro Tosi <morph@debian.org>  Fri, 24 Apr 2020 00:32:17 -0400
+
+m2crypto (0.35.2-1) unstable; urgency=medium
+
+  * New upstream release
+  * run autopkgtests for all python3 supported versions; Closes: #954462
+  * debian/copyright
+    - update upstream copyright years
+    - add myself to copyright, and order entries chrologically
+  * debian/control
+    - bump Standards-Version to 4.5.0 (no changes needed)
+  * debian/patches/*
+    - drop almost all patches, merged upstream
+  * debian/patches/d3a43ffe1bfe4c128d6ab7c390419dee68f4ca5a.patch
+    - add compatibility with python3.8 way of wrapping a fp in a Buffer;
+      Closes: #958496
+
+ -- Sandro Tosi <morph@debian.org>  Thu, 23 Apr 2020 23:48:21 -0400
+
+m2crypto (0.31.0-9) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Set upstream metadata fields: Bug-Database, Bug-Submit, Repository,
+    Repository-Browse.
+
+  [ Sandro Tosi ]
+  * Drop python2 support; Closes: #936975
+
+ -- Sandro Tosi <morph@debian.org>  Fri, 31 Jan 2020 00:17:53 -0500
+
+m2crypto (0.31.0-8) unstable; urgency=medium
+
+  * Adopt package; Closes: #945182
+
+ -- Sandro Tosi <morph@debian.org>  Thu, 21 Nov 2019 22:31:01 -0500
+
+m2crypto (0.31.0-7) unstable; urgency=medium
+
+  * Orphaning package.
+  * Bump Standards-Version to 4.4.1 [Ondřej Nový].
+
+ -- Daniel Stender <stender@debian.org>  Wed, 20 Nov 2019 23:37:23 +0100
+
+m2crypto (0.31.0-6) unstable; urgency=medium
+
+  * Perform complete source-only upload (Closes: #934914).
+
+ -- Daniel Stender <stender@debian.org>  Sun, 18 Aug 2019 18:29:59 +0200
+
+m2crypto (0.31.0-5) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * Use debhelper-compat instead of debian/compat.
+  * Add python3-m2crypto.
+  * Run tests during build automatically with pybuild.
+  * Build sphinx docs with Python 3.
+  * Bump debhelper compat level to 12.
+  * Bump standards version to 4.4.0 (no changes).
+  * d/patches: Fix typo erorr -> error.
+
+ -- Daniel Stender <stender@debian.org>  Sun, 11 Aug 2019 10:46:16 +0200
+
+m2crypto (0.31.0-4) unstable; urgency=medium
+
+  * Add a few patches from upstream to avoid a testsuite
+    regression while testing for bug which was fixed in OpenSSL
+    1.1.1c (Closes: #929903) [thanks to Sebastian Andrzej Siewior].
+
+ -- Daniel Stender <stender@debian.org>  Sun, 09 Jun 2019 09:42:32 +0200
+
+m2crypto (0.31.0-3) unstable; urgency=medium
+
+  * add 0002-tests-test_ssl-use-ciphercuites-for-TLS1.3-cipher-in.patch
+    (Closes: #923446, thanks to Sebastian Andrzej Siewior).
+
+ -- Daniel Stender <stender@debian.org>  Mon, 11 Mar 2019 19:44:01 +0100
+
+m2crypto (0.31.0-2) unstable; urgency=medium
+
+  * deb/control:
+    + expand use of !nodoc build profile switch among b-deps.
+  * deb/rules:
+    + use filter function for scanning options instead of findstring.
+    + scan for nodoc build option in override for dh_installdocs.
+
+ -- Daniel Stender <stender@debian.org>  Wed, 19 Dec 2018 08:02:55 +0100
+
+m2crypto (0.31.0-1) unstable; urgency=medium
+
+  * Upload to unstable.
+  * New upstream release (Closes: #907219).
+  * deb/clean:
+    + clean .pytest_cache instead of .cache.
+  * deb/control:
+    + bump standards version to 4.2.1 (no further changes needed).
+  * deb/copyright:
+    + add M2Crypto.egg-info to Files-Excluded.
+  * deb/rules:
+    + build with DH_VERBOSE=1 (according to standards 4.2.0).
+    + build with hardening=+all.
+    + drop unnecessary export line for DEB_BUILD_OPTIONS.
+    + un-failsafe tests.
+  * install switches for build profiles:
+    + d/control: add !nodoc and !nocheck switches to b-deps, Build-
+      Profiles to docs package.
+    + d/rules: add if-loop to not run sphinxdoc dh ext if nodoc profile
+      is set.
+  * build with dh 11 (changes in d/control and d/compat).
+
+ -- Daniel Stender <stender@debian.org>  Sat, 10 Nov 2018 11:49:42 +0100
+
+m2crypto (0.30.1+git20181013.1576f1e-1) experimental; urgency=medium
+
+  * Latest repository snapshot:
+    + drop securely-mangle-changed-strings.patch (applied upstream).
+    + drop sni-test-race.patch (applied upstream).
+  * deb/control:
+    + remove ancient X-Python-Version field [Ondřej Nový].
+  * deb/rules:
+    + restore override for dh_auto_test run all tests on ppc64el etc.
+    + temporarily failsafe tests.
+
+ -- Daniel Stender <stender@debian.org>  Fri, 02 Nov 2018 11:46:34 +0100
+
+m2crypto (0.27.0-6) unstable; urgency=medium
+
+  * add DEP-8 testsuite.
+  * deb/clean:
+    + add in-place extensions to cleanings.
+  * build docs package:
+    + add package description in deb/control.
+    + update Depends, Suggests and description of module binary.
+    + rename deb/doc-base files, update paths within.
+    + change dh_autoinstall override in deb/rules to build docs into that.
+    + add -A to dh_installdocs to contribute README everywhere.
+
+ -- Daniel Stender <stender@debian.org>  Sun, 06 May 2018 00:18:40 +0200
+
+m2crypto (0.27.0-5) unstable; urgency=medium
+
+  * deb/control:
+    + bump standards to 4.1.3 (no changes needed).
+    + Set Vcs-* to salsa.debian.org [Ondřej Nový].
+  * deb/copyright:
+    + expand copyright span to 2018.
+
+ -- Daniel Stender <stender@debian.org>  Sun, 18 Feb 2018 20:32:06 +0100
+
+m2crypto (0.27.0-4) unstable; urgency=medium
+
+  * deb/rules: temporarily disable test_HTTPSConnection_SNI_support on
+    ppc-s (Closes: #881652).
+  * add securely-mangle-changed-strings.patch.
+  * deb/source/options: complete modified files for extend-diff-ignore.
+
+ -- Daniel Stender <stender@debian.org>  Tue, 14 Nov 2017 22:51:30 +0100
+
+m2crypto (0.27.0-3) unstable; urgency=medium
+
+  * deb/rules:
+    + unset $http{,s}_proxy (set by pybuild) for tests.
+    + run elinks with fixed locale C.UTF-8 for reproducible buiding.
+    + drop override for dh_compress (example scripts aren't shipped
+      anymore).
+  * drop skip-some-tests.patch, add sni-test-race.patch.
+
+ -- Daniel Stender <stender@debian.org>  Mon, 13 Nov 2017 14:19:19 +0100
+
+m2crypto (0.27.0-2) unstable; urgency=medium
+
+  * Upload to unstable.
+  * mv skip-test_urllib.patch skip-some-tests.patch, add another
+    test, update.
+
+ -- Daniel Stender <stender@debian.org>  Sun, 12 Nov 2017 20:21:25 +0100
+
+m2crypto (0.27.0-1) experimental; urgency=medium
+
+  * New upstream release:
+    + update import-inspect-in-urllib-2.patch.
+  * remove egg-info folder instead of ignoring it:
+    + add M2Crypto.egg-info to debian/clean.
+    + drop debian/source/options.
+  * check tarball signature:
+    + add debian/upstream with public key of <matej@ceplovi.cz>.
+    + add pgpsigurlmangle to debian/watch.
+  * handle SWIG/_m2crypto_wrap.c by diff-ignore in
+    deb/source/options, drop it from deb/clean.
+  * deb/clean:
+    + add .cache/.
+  * deb/control:
+    + add python-typing to build-deps.
+    + build against libssl-dev (Closes: #859225).
+    + bump standards version to 4.1.1.
+  * deb/copyright:
+    + adjust some years according to LICENSE.
+    + add Matěj Cepl to copyright holders.
+  * deb/rules:
+    + use PYBUILD_AFTER_BUILD to cp binding inplace for tests.
+    + remove failsafe from tests.
+    + shorten override for dh_auto_test, run tests from $(CURDIR).
+  * tarball now ships with sphinx docs:
+    + add override for dh_auto_install running sphinx-build in deb/rules.
+    + drop deb/python-m2crypto.docs.
+    + add python-sphinx to build-deps in deb/control.
+    + add dh_sphinxdoc to dh extensions to run in deb/rules.
+    + add ${sphinxdoc:Depends} for binary package in deb/control.
+    + add prebuild doc/html to Files-Excluded in deb/copyright.
+    + update existing doc-base files in deb/ for new folder.
+    + add deb/python-m2crypto.doc-base.
+  * add skip-test_urllib.patch.
+
+ -- Daniel Stender <stender@debian.org>  Mon, 06 Nov 2017 21:10:45 +0100
+
+m2crypto (0.24.0-2) unstable; urgency=medium
+
+  * drop git-dpm regime (remove deb/.git-dpm, add deb/gbp.conf).
+  * deb/control:
+    + add DPMT as Uploaders.
+    + update Vcs fields (package moves to python-modules).
+  * deb/copyright:
+    + use https in Format field.
+    + expand copyright span of debian/*.
+  * use debhelper level 10 (changes in deb/compat and deb/control).
+  * bump standards version to 4.0.0 (no further changes needed).
+
+ -- Daniel Stender <stender@debian.org>  Mon, 17 Jul 2017 20:09:18 +0200
+
+m2crypto (0.24.0-1.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Build depend on openssl 1.0 for Stretch (Closes: #827068)
+
+ -- Sebastian Andrzej Siewior <sebastian@breakpoint.cc>  Sun, 05 Feb 2017 14:37:04 +0100
+
+m2crypto (0.24.0-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #818986):
+    + dropped applied and obsolete patches.
+    + examples (demo/) not shipped anymore:
+      * removed deb/python-m2crypto.exmaples.
+      * dropped override for dh_installexamples in deb/rules.
+      * removed all demo/ targets from deb/copyright.
+  * deb/control:
+    + updated maintainer email address.
+    + sorted build-deps logically (from alphabetical).
+    + bumped standards to 3.9.7 (no changes needed).
+    + added Vcs-Git and Vcs-Browser.
+  * deb/copyright: updated.
+  * deb/rules: added DEB_BUILD_MAINT_OPTIONS with BINDNOW hardening.
+  * Set up build-time tests:
+    + added override for dh_auto_test in deb/rules for py.test.
+    + added build-deps against python-pytest and openssl in deb/control,
+      dropped python-unittest2 from build-deps.
+  * Prevent the use of Pandoc (requested for downstream development):
+    + convert README.rst with rst2html and links in deb/rules.
+    + build-dep against python-docutils and links, dropped Pandoc.
+  * Initialized git-dpm (added deb/.git-dpm).
+
+ -- Daniel Stender <stender@debian.org>  Tue, 29 Mar 2016 21:16:04 +0200
+
+m2crypto (0.22.6~rc4-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #744137).
+  * deb/changelog:
+    + Removed trailing whitespaces.
+  * deb/control:
+    + Change of maintainer (Closes: #726262).
+    + Removed cbds from build-deps, added dh-python.
+    + Bumped debhelper level to 9 (also in deb/compat).
+    + Added python-unittest2 and pandoc to build-deps.
+    + Updated and removed unnecessary versions among build-deps.
+    + Added X-Python-Version.
+    + Dropped Vcs-Git and Browser (not collaboratively maintained).
+    + Updated Homepage.
+    + Specified short description line.
+  * deb/copyright:
+    + Rewritten for Dep-5, specified some Licenses.
+  * deb/patches:
+    + Restored Quilt patch regime (added patches/series, dropped sequence
+      prefixes, restored proper DEP-3 headers).
+    + Dropped 0002-Disable-SSLv2_method-when-disabled-in-OpenSSL-iself.patch
+      (applied upstream ac01b383).
+    + Added disable-sslv3.patch (Closes: #803946) [thanks to Kurt Roeckx].
+  * deb/rules:
+    + Added DH_VERBOSE and DEB_BUILD_OPTIONS lines.
+    + Build with dh sequencer and Pybuild.
+    + Added override for dh_installdocs.
+    + Added override for dh_installexamples with hacks for Lintian complaints.
+    + Dropped clean target (put needed cleans into deb/clean).
+  * deb/watch:
+    + Added uversionmangle.
+  * Added:
+    + deb/source/format (3.0 quilt).
+    + deb/source/option (diff-ignore egg-info dir).
+    + deb/clean (instead of clean target in deb/rules).
+    + deb/python-m2crypto.examples (packaging demo/).
+  * Dropped:
+    + deb/gbp.conf (not needed anymore).
+  * Moved:
+    + deb/docs to deb/python-m2crypto.docs.
+  * Wrap-and-sort -a -s.
+
+ -- Daniel Stender <debian@danielstender.com>  Thu, 19 Nov 2015 10:38:29 +0100
+
+m2crypto (0.21.1-4) unstable; urgency=low
+
+  * QA upload.
+  * Maintainer field set to QA Group.
+  * Bump Standards-Version to 3.9.6.
+  * Remove Uploaders field.
+  * Fix debian/watch by using pypi.debian.net.
+  * Do not start synopsis with an article.
+
+ -- Emanuele Rocca <ema@debian.org>  Sat, 12 Sep 2015 10:48:32 +0200
+
+m2crypto (0.21.1-3) unstable; urgency=low
+
+  b435179 Look for OpenSSL headers in multiarch path.
+          Thanks to Colin Watson <cjwatson@ubuntu.com> (Closes: #696327)
+
+ -- Charles Plessy <plessy@debian.org>  Sat, 05 Jan 2013 18:01:43 +0900
+
+m2crypto (0.21.1-2) unstable; urgency=low
+
+  [939cdded] Disable SSLv2_method when disabled in OpenSSL iself
+             (Closes: #637904).
+  [10433e12] Documented applied patches in debian/patches.
+  [69b60a5d] Added debian/gbp.conf to show that the package is managed
+             with git-buildpackage.
+
+ -- Charles Plessy <plessy@debian.org>  Tue, 16 Aug 2011 08:41:24 +0900
+
+m2crypto (0.21.1-1) unstable; urgency=low
+
+  * New upstream releases supporting OpenSSL 1.0 (see #622001).
+    Closes: #634015.
+  * [0d774d2b] Transition to dh_python2.
+  * [b6719dce] Switched to Debhelper 8.
+  * [966a9d1b] Register the documentation with doc-base.
+  * [ff50d3c0] Switch to CDBS.
+  * [3592aa95] Complies with Policy 3.9.2 (no changes needed).
+  * [955a5309] Use debhelper's ${misc:Depends}.
+  * [8eef3145] Package in collab-maint on Alioth. Added myself as Uploader.
+  * [66745855] Removed Pre-Etch Replaces and Conflicts statements.
+  * [f5a50460] Documented upstream project's homepage.
+  * [0cc12cb3] Compress binary package with xz.
+  * [bc6599b4] Updated the list of files to remove at clean time.
+
+ -- Charles Plessy <plessy@debian.org>  Sun, 14 Aug 2011 14:23:11 +0900
+
+m2crypto (0.20.1-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Backport revision 721 from upstream SVN repository to fix build errors
+    with libssl-dev >= 1.0.0. (Closes: #622001)
+  * Do not provide sslv2_method if SSLv2 is not available.
+
+ -- Sebastian Ramacher <s.ramacher@gmx.at>  Fri, 24 Jun 2011 17:27:46 +0200
+
+m2crypto (0.20.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Dima Barsky <dima@debian.org>  Sat, 12 Sep 2009 12:50:09 +0100
+
+m2crypto (0.19.1-2) unstable; urgency=low
+
+  * Fixed the URL in the watch file (Closes: #450167)
+
+ -- Dima Barsky <dima@debian.org>  Mon, 15 Jun 2009 22:11:39 +0100
+
+m2crypto (0.19.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Dima Barsky <dima@debian.org>  Mon, 15 Jun 2009 21:54:41 +0100
+
+m2crypto (0.18.2-2) unstable; urgency=low
+
+  * Added "import inspect" to M2Crypto/m2urllib2.py
+    (Closes: #493314, #484364, 477799)
+
+ -- Dima Barsky <dima@debian.org>  Fri, 15 Aug 2008 22:04:14 +0100
+
+m2crypto (0.18.2-1) unstable; urgency=low
+
+  * New upstream release (Closes: #440837)
+
+ -- Dima Barsky <dima@debian.org>  Sat, 13 Oct 2007 02:21:26 +0100
+
+m2crypto (0.17-2) unstable; urgency=low
+
+  * Added "Build-Depends: python-setuptools" to avoid build inconsistencies.
+
+ -- Dima Barsky <dima@debian.org>  Thu, 19 Jul 2007 09:51:13 +0100
+
+m2crypto (0.17-1) unstable; urgency=low
+
+  * New upstream release
+  * Acknowledge NMU (Closes: #380861)
+  * Changed section to python (Closes: #425875)
+
+ -- Dima Barsky <dima@debian.org>  Thu, 24 May 2007 21:14:36 +0100
+
+m2crypto (0.16-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Update package to the last python policy (Closes: #380861),
+    this includes renaming from m2crypto to python-m2crypto.
+  * Bumped compat to 5.
+
+ -- Ana Beatriz Guerrero Lopez <ana@ekaia.org>  Sat, 12 Aug 2006 16:07:49 +0200
+
+m2crypto (0.16-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Dima Barsky <dima@debian.org>  Sat, 22 Jul 2006 11:11:40 +0100
+
+m2crypto (0.13-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Dima Barsky <dima@debian.org>  Tue, 30 Mar 2004 21:54:28 +0100

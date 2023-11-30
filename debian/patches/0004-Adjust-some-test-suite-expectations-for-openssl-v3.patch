@@ -1,0 +1,41 @@
+From: Dimitri John Ledkov <dimitri.ledkov@canonical.com>
+Date: Wed, 18 May 2022 08:50:37 -0400
+Subject: Adjust some test suite expectations for openssl v3.
+
+Bug-Upstream: https://gitlab.com/m2crypto/m2crypto/-/issues/310
+Bug-Debian: https://bugs.debian.org/1006508
+---
+ tests/test_x509.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/tests/test_x509.py b/tests/test_x509.py
+index 30d6eff..bdf8c28 100644
+--- a/tests/test_x509.py
++++ b/tests/test_x509.py
+@@ -373,7 +373,7 @@ class X509TestCase(unittest.TestCase):
+                              'proxyCertInfo')
+             self.assertEqual(proxycert.get_ext_at(0).get_value(),
+                              'Path Length Constraint: infinite\n' +
+-                             'Policy Language: Inherit all\n')
++                             'Policy Language: Inherit all')
+             self.assertEqual(proxycert.get_ext_count(), 1,
+                              proxycert.get_ext_count())
+             self.assertEqual(proxycert.get_subject().as_text(),
+@@ -608,7 +608,7 @@ class X509StackTestCase(unittest.TestCase):
+         subject = cert.get_subject()
+         self.assertEqual(
+             str(subject),
+-            "/DC=org/DC=doegrids/OU=Services/CN=host/bosshog.lbl.gov")
++            "/DC=org/DC=doegrids/OU=Services/CN=host\\/bosshog.lbl.gov")
+ 
+     def test_make_stack_check_num(self):
+         with open("tests/der_encoded_seq.b64", 'rb') as f:
+@@ -630,7 +630,7 @@ class X509StackTestCase(unittest.TestCase):
+         subject = cert.get_subject()
+         self.assertEqual(
+             str(subject),
+-            "/DC=org/DC=doegrids/OU=Services/CN=host/bosshog.lbl.gov")
++            "/DC=org/DC=doegrids/OU=Services/CN=host\\/bosshog.lbl.gov")
+ 
+     def test_make_stack(self):
+         stack = X509.X509_Stack()

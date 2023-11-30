@@ -1,0 +1,20 @@
+From: Stefano Rivera <stefanor@debian.org>
+Date: Wed, 18 May 2022 10:07:37 -0400
+Subject: Skip TLSv1 Test
+
+---
+ tests/test_ssl.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tests/test_ssl.py b/tests/test_ssl.py
+index 01d63ff..4e69cee 100644
+--- a/tests/test_ssl.py
++++ b/tests/test_ssl.py
+@@ -418,6 +418,7 @@ class MiscSSLClientTestCase(BaseSSLClientTestCase):
+         finally:
+             self.stop_server(pid)
+ 
++    @unittest.skip("No longer possible to use TLS1.0 on Debian")
+     def test_tls1_ok(self):
+         self.args.append('-tls1')
+         pid = self.start_server(self.args)

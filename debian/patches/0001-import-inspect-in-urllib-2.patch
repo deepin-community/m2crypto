@@ -1,4 +1,3 @@
-From 2ad0fd8ab07e54f5cdf66b770c8f1155cb469247 Mon Sep 17 00:00:00 2001
 From: Dima Barsky <dima@debian.org>
 Date: Tue, 29 Mar 2016 19:23:26 +0200
 Subject: import inspect in urllib 2
@@ -11,6 +10,8 @@ Last-Update: 2017-11-05
  src/M2Crypto/m2urllib2.py | 1 +
  1 file changed, 1 insertion(+)
 
+diff --git a/src/M2Crypto/m2urllib2.py b/src/M2Crypto/m2urllib2.py
+index 1849051..d550978 100644
 --- a/src/M2Crypto/m2urllib2.py
 +++ b/src/M2Crypto/m2urllib2.py
 @@ -14,6 +14,7 @@ Summary of changes:
