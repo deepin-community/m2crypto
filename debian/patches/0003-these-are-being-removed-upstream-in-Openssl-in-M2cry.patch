@@ -1,0 +1,25 @@
+From: Dimitri John Ledkov <dimitri.ledkov@canonical.com>
+Date: Wed, 18 May 2022 08:49:19 -0400
+Subject: these are being removed upstream in Openssl & in M2crypto
+
+Bug-Upstream: https://gitlab.com/m2crypto/m2crypto/-/issues/310
+Bug-Debian: https://bugs.debian.org/1006508
+---
+ tests/test_rsa.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tests/test_rsa.py b/tests/test_rsa.py
+index 7bb3af7..fff6760 100644
+--- a/tests/test_rsa.py
++++ b/tests/test_rsa.py
+@@ -115,8 +115,8 @@ class RSATestCase(unittest.TestCase):
+         with self.assertRaises(TypeError):
+             priv.private_encrypt(self.gen_callback, RSA.pkcs1_padding)
+ 
+-    @unittest.skipIf(m2.OPENSSL_VERSION_NUMBER < 0x1010103f,
+-                     'Relies on fix which happened only in OpenSSL 1.1.1c')
++    @unittest.skipIf(not 0x1010103f < m2.OPENSSL_VERSION_NUMBER < 0x101010af,
++                     'Relies on fix which happened between OpenSSL 1.1.1c & j')
+     def test_public_encrypt(self):
+         priv = RSA.load_key(self.privkey)
+         # pkcs1_padding, pkcs1_oaep_padding
