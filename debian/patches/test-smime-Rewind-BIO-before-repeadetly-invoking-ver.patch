@@ -1,0 +1,36 @@
+From 08308043d7ce8bb645996c8cb29655a23ead43a4 Mon Sep 17 00:00:00 2001
+From: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
+Date: Tue, 13 Feb 2024 17:47:22 +0100
+Subject: [PATCH] test/smime: Rewind BIO before repeadetly invoking verify.
+
+OpenSSL had an optimisation for PKCS7_verify() where it kept the memory
+BIO around. This optimisation is gone in OpenSSL 3.2 and so the test for
+verify fails because the memory BIO "ended".
+
+Rewind the BIO before invoking verify again on the same data.
+
+Signed-off-by: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
+---
+ tests/test_smime.py | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tests/test_smime.py b/tests/test_smime.py
+index 6014315353824..1fe7e954fcb89 100644
+--- a/tests/test_smime.py
++++ b/tests/test_smime.py
+@@ -162,10 +162,12 @@ from tests import unittest
+         with self.assertRaises(SMIME.PKCS7_Error):
+             s.verify(p7, data)
+ 
++        data.seek(0)
+         st.set_verify_cb(verify_cb_dummy_function)
+         v = s.verify(p7, data)
+         self.assertEqual(v, self.cleartext)
+ 
++        data.seek(0)
+         st.set_verify_cb()
+         v = s.verify(p7, data)
+         self.assertEqual(v, self.cleartext)
+-- 
+2.43.0
+

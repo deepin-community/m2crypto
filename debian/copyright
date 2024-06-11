@@ -15,8 +15,8 @@ Comment: https://fedoraproject.org/wiki/Licensing:MIT#Old_Style_with_legal_discl
 License: Expat
 
 Files: debian/*
-Copyright: 2004-2009 Dima Barsky <dima@debian.org
-           2006      Ana Beatriz Guerrero Lopez <ana@ekaia.org
+Copyright: 2004-2009 Dima Barsky <dima@debian.org>
+           2006      Ana Beatriz Guerrero Lopez <ana@ekaia.org>
            2011      Sebastian Ramacher <s.ramacher@gmx.at>
            2011-2013 Charles Plessy <plessy@debian.org>
            2015      Emanuele Rocca <ema@debian.org>

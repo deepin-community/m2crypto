@@ -6,7 +6,6 @@ M2Crypto
 :Web-Site: https://gitlab.com/m2crypto/m2crypto
 :Documentation: https://m2crypto.readthedocs.io/
 :Email list: m2crypto@lists.redcrew.org or http://redcrew.org/mailman/listinfo/m2crypto
-:IRC channel: `#m2crypto`_ on Freenode
 
 M2Crypto = Python + OpenSSL + SWIG
 ----------------------------------
@@ -32,8 +31,6 @@ M2Crypto comes with the following:
 - **FTP/TLS** client and server.
 
 - **S/MIME v2**.
-
-- **ZServerSSL**: A **HTTPS server for Zope**.
 
 - **ZSmime**: An S/MIME messenger for **Zope**.
 
@@ -66,6 +63,3 @@ Note these caveats:
   things are cleared when the Python objects are deleted.
 
 Have fun! Your feedback is welcome.
-
-.. _`#m2crypto`:
-    irc://Freenode/#m2crypto

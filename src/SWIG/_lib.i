@@ -121,6 +121,20 @@ void blob_free(Blob *blob) {
 %ignore m2_PyObject_GetBufferInt;
 %ignore m2_PyBuffer_Release;
 %ignore m2_PyString_AsStringAndSizeInt;
+
+%newobject mpi_to_bn;
+%newobject bin_to_bn;
+
+%nodefaultctor bignum_st;
+struct bignum_st {};
+typedef struct bignum_st BIGNUM;
+
+%extend bignum_st {
+   ~bignum_st() {
+      BN_free($self);
+   }
+};
+
 %{
 
 static int
@@ -761,6 +775,8 @@ BIGNUM *dec_to_bn(PyObject *value) {
 %rename(err_print_errors) ERR_print_errors;
 %threadallow ERR_print_errors;
 extern void ERR_print_errors(BIO *);
+%rename(err_clear_error) ERR_clear_error;
+extern void ERR_clear_error(void);
 %rename(err_get_error) ERR_get_error;
 extern unsigned long ERR_get_error(void);
 %rename(err_peek_error) ERR_peek_error;

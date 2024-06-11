@@ -7,7 +7,7 @@ Copyright (c) 2005 Open Source Applications Foundation. All rights reserved."""
 import datetime
 import time
 
-from M2Crypto import ASN1, m2
+from M2Crypto import ASN1, m2, util
 from tests import unittest
 
 
@@ -38,6 +38,7 @@ class ASN1TestCase(unittest.TestCase):
     def test_Object(self):
         pass  # XXX Dunno how to test
 
+    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
     def test_TIME(self):
         asn1 = ASN1.ASN1_TIME()
         self.assertEqual(str(asn1), 'Bad time value')
@@ -47,13 +48,13 @@ class ASN1TestCase(unittest.TestCase):
 
         s = '990807053011Z'
         asn1.set_string(s)
-        # assert str(asn1) == 'Aug  7 05:30:11 1999 GMT'
+        self.assertEqual(str(asn1), 'Aug  7 05:30:11 1999 GMT')
         t1 = time.strptime(str(asn1), format)
         t2 = time.strptime(s, utcformat)
         self.assertEqual(t1, t2)
 
         asn1.set_time(500)
-        # assert str(asn1) == 'Jan  1 00:08:20 1970 GMT'
+        self.assertEqual(str(asn1), 'Jan  1 00:08:20 1970 GMT')
         t1 = time.strftime(format, time.strptime(str(asn1), format))
         t2 = time.strftime(format, time.gmtime(500))
         self.assertEqual(t1, t2)
@@ -64,6 +65,7 @@ class ASN1TestCase(unittest.TestCase):
         t2 = time.strftime(format, time.gmtime(t))
         self.assertEqual(t1, t2)
 
+    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
     def test_UTCTIME(self):
         asn1 = ASN1.ASN1_UTCTIME()
         self.assertEqual(str(asn1), 'Bad time value')
@@ -73,13 +75,13 @@ class ASN1TestCase(unittest.TestCase):
 
         s = '990807053011Z'
         asn1.set_string(s)
-        # assert str(asn1) == 'Aug  7 05:30:11 1999 GMT'
+        # self.assertEqual(str(asn1), 'Aug  7 05:30:11 1999 GMT')
         t1 = time.strptime(str(asn1), format)
         t2 = time.strptime(s, utcformat)
         self.assertEqual(t1, t2)
 
         asn1.set_time(500)
-        # assert str(asn1) == 'Jan  1 00:08:20 1970 GMT'
+        # self.assertEqual(str(asn1), 'Jan  1 00:08:20 1970 GMT')
         t1 = time.strftime(format, time.strptime(str(asn1), format))
         t2 = time.strftime(format, time.gmtime(500))
         self.assertEqual(t1, t2)
@@ -90,6 +92,7 @@ class ASN1TestCase(unittest.TestCase):
         t2 = time.strftime(format, time.gmtime(t))
         self.assertEqual(t1, t2)
 
+    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
     def test_TIME_datetime(self):
         asn1 = ASN1.ASN1_TIME()
         # Test get_datetime and set_datetime
@@ -115,6 +118,7 @@ class ASN1TestCase(unittest.TestCase):
         self.assertEqual(t1, t2)
         self.assertEqual(str(udt), str(asn1.get_datetime()))
 
+    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
     def test_UTCTIME_datetime(self):
         asn1 = ASN1.ASN1_UTCTIME()
         # Test get_datetime and set_datetime

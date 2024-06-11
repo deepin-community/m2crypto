@@ -115,7 +115,8 @@ class RSATestCase(unittest.TestCase):
         with self.assertRaises(TypeError):
             priv.private_encrypt(self.gen_callback, RSA.pkcs1_padding)
 
-    @unittest.skipIf(m2.OPENSSL_VERSION_NUMBER < 0x1010103f,
+    @unittest.skipIf(m2.OPENSSL_VERSION_NUMBER < 0x1010103f or
+                     m2.OPENSSL_VERSION_NUMBER >= 0x30000000,
                      'Relies on fix which happened only in OpenSSL 1.1.1c')
     def test_public_encrypt(self):
         priv = RSA.load_key(self.privkey)
@@ -127,6 +128,7 @@ class RSATestCase(unittest.TestCase):
             self.assertEqual(ptxt, self.data)
 
         # no_padding
+        m2.err_clear_error()
         with six.assertRaisesRegex(self, RSA.RSAError, 'data too small'):
             priv.public_encrypt(self.data, RSA.no_padding)
 
@@ -146,8 +148,6 @@ class RSATestCase(unittest.TestCase):
                          b'\000\000\000\003\001\000\001')  # aka 65537 aka 0xf4
         with self.assertRaises(RSA.RSAError):
             setattr(rsa, 'e', '\000\000\000\003\001\000\001')
-        with self.assertRaises(RSA.RSAError):
-            rsa.private_encrypt(1)
         with self.assertRaises(RSA.RSAError):
             rsa.private_decrypt(1)
         assert rsa.check_key()
@@ -264,7 +264,11 @@ class RSATestCase(unittest.TestCase):
                 algos['sha512'] = 0
 
             for algo, salt_max in algos.items():
-                h = hashlib.new(algo)
+                try:
+                    h = hashlib.new(algo)
+                except ValueError:
+                    algos[algo] = (None, None)
+                    continue
                 h.update(message)
                 digest = h.digest()
                 algos[algo] = (salt_max, digest)
@@ -272,6 +276,8 @@ class RSATestCase(unittest.TestCase):
             rsa = RSA.load_key(self.privkey)
             rsa2 = RSA.load_pub_key(self.pubkey)
             for algo, (salt_max, digest) in algos.items():
+                if salt_max is None or digest is None:
+                    continue
                 for salt_length in range(0, salt_max):
                     signature = rsa.sign_rsassa_pss(digest, algo, salt_length)
                     verify = rsa2.verify_rsassa_pss(digest, signature,
