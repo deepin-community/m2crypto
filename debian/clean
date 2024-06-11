@@ -1,3 +1,4 @@
 M2Crypto.egg-info/
 .pytest_cache/
 M2Crypto/*.so
+src/SWIG/_m2crypto_wrap.c

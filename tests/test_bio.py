@@ -10,11 +10,9 @@ Author: Heikki Toivonen
 """
 import logging
 
-from parameterized import parameterized
-
-from M2Crypto import BIO, Rand
+from M2Crypto import BIO, Rand, m2, six
 from tests import unittest
-from .fips import fips_mode
+from tests.fips import fips_mode
 
 log = logging.getLogger('test_bio')
 
@@ -30,8 +28,9 @@ nonfips_ciphers = ['bf_ecb', 'bf_cbc', 'bf_cfb', 'bf_ofb',
                    # 'rc5_ecb', 'rc5_cbc', 'rc5_cfb', 'rc5_ofb',
                    'des_ecb', 'des_cbc', 'des_cfb', 'des_ofb',
                    'rc4', 'rc2_40_cbc']
-if not fips_mode:  # Forbidden ciphers
+if not fips_mode and m2.OPENSSL_VERSION_NUMBER < 0x30000000:  # Forbidden ciphers
     ciphers += nonfips_ciphers
+
 
 
 class CipherStreamTestCase(unittest.TestCase):
@@ -68,9 +67,11 @@ class CipherStreamTestCase(unittest.TestCase):
         self.assertEqual(data, data2,
                          '%s algorithm cipher test failed' % algo)
 
-    @parameterized.expand(ciphers)
-    def test_algo(self, algo):
-        self.try_algo(algo)
+    @unittest.skipUnless(six.PY34, "Doesn't support subTest")
+    def test_algo(self):
+        for algo in ciphers:
+            with self.subTest(algo=algo):
+                self.try_algo(algo)
 
     def test_nosuchalgo(self):
         with self.assertRaises(ValueError):

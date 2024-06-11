@@ -10,9 +10,8 @@ Copyright (c) 1999-2003 Ng Pheng Siong. All rights reserved.
 Portions copyright (c) 2005-2006 Vrije Universiteit Amsterdam.
 All rights reserved."""
 
-from M2Crypto import BIO, Err, EVP, m2, util
+from M2Crypto import BIO, Err, m2, util
 from typing import AnyStr, Callable, Dict, Optional, Tuple, Union  # noqa
-from M2Crypto.EVP import PKey
 
 EC_Key = bytes
 
@@ -322,6 +321,16 @@ class EC_pub(EC):
         assert self.check_key(), 'key is not initialised'
         return m2.ec_key_get_public_key(self.ec)
 
+    def as_pem(self):
+        """
+        Returns the key(pair) as a string in PEM format.
+        If no password is passed and the cipher is set
+        it exits with error
+        """
+        with BIO.MemoryBuffer() as bio:
+            self.save_key_bio(bio)
+            return bio.read()
+
     save_key = EC.save_pub_key
 
     save_key_bio = EC.save_pub_key_bio
@@ -402,7 +411,7 @@ def load_pub_key(file):
 
 
 def load_key_string_pubkey(string, callback=util.passphrase_callback):
-    # type: (str, Callable) -> PKey
+    # type: (str, Callable) -> EC.PKey
     """
     Load an M2Crypto.EC.PKey from a public key as a string.
 
@@ -414,8 +423,9 @@ def load_key_string_pubkey(string, callback=util.passphrase_callback):
 
     :return: M2Crypto.EC.PKey object.
     """
+    from M2Crypto.EVP import load_key_bio_pubkey
     with BIO.MemoryBuffer(string) as bio:
-        return EVP.load_key_bio_pubkey(bio, callback)
+        return load_key_bio_pubkey(bio, callback)
 
 
 def load_pub_key_bio(bio):

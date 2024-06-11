@@ -14,7 +14,6 @@ Server tests:
 - ???
 
 Others:
-- ssl_dispatcher
 - SSLServer
 - ForkingSSLServer
 - ThreadingSSLServer
@@ -247,6 +246,7 @@ class HttpslibSSLClientTestCase(BaseSSLClientTestCase):
             httpslib.HTTPSConnection('example.org', badKeyword=True)
 
 
+@unittest.skipIf(sys.platform == 'win32', "Test doesn't work on Windows")
 class HttpslibSSLSNIClientTestCase(BaseSSLClientTestCase):
     def setUp(self):
         super(HttpslibSSLSNIClientTestCase, self).setUp()
@@ -391,7 +391,7 @@ class MiscSSLClientTestCase(BaseSSLClientTestCase):
             self.assertEqual(r.sec, DEFAULT_TIMEOUT, r.sec)
             self.assertEqual(r.microsec, 0, r.microsec)
             self.assertEqual(w.sec, test_timeout_sec, w.sec)
-            self.assertEqual(w.microsec, test_timeout_microsec, w.microsec)
+            self.assertLess(abs(w.microsec - test_timeout_microsec), 4000 , w.microsec)
 
             s.connect(self.srv_addr)
             data = self.http_get(s)
@@ -410,13 +410,15 @@ class MiscSSLClientTestCase(BaseSSLClientTestCase):
                 warnings.simplefilter('ignore', DeprecationWarning)
                 ctx = SSL.Context('tlsv1')
             s = SSL.Connection(ctx)
+            s.set_cipher_list('DEFAULT:@SECLEVEL=0')
             with six.assertRaisesRegex(self, SSL.SSLError,
-                                       r'version|unexpected eof'):
+                                       r'version|unexpected eof|internal error'):
                 s.connect(self.srv_addr)
             s.close()
         finally:
             self.stop_server(pid)
 
+    @unittest.skipIf(m2.OPENSSL_VERSION_NUMBER >= 0x30000000, "No TLS1 is allowed")
     def test_tls1_ok(self):
         self.args.append('-tls1')
         pid = self.start_server(self.args)
@@ -1057,6 +1059,7 @@ class Urllib2TEChunkedSSLClientTestCase(BaseSSLClientTestCase):
             self.stop_server(pid)
 
 
+@unittest.skip("Twisted integration has been temporarily switched off.")
 class TwistedSSLClientTestCase(BaseSSLClientTestCase):
 
     def test_timeout(self):
@@ -1100,6 +1103,7 @@ class TwistedSSLClientTestCase(BaseSSLClientTestCase):
             self.stop_server(pid)
         self.assertIn(b's_server -quiet -www', data)
 
+    @unittest.skipIf(sys.platform == 'win32', "os.mkfifo not available on Windows")
     def test_makefile_timeout_fires(self):
         # This is convoluted because (openssl s_server -www) starts
         # writing the response as soon as it receives the first line of

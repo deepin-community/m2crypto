@@ -14,9 +14,7 @@ import logging
 
 from binascii import a2b_hex, hexlify, unhexlify
 
-from parameterized import parameterized
-
-from M2Crypto import BIO, EVP, RSA, Rand, m2, util
+from M2Crypto import BIO, EVP, RSA, EC, Rand, m2, six, util
 from tests import unittest
 from tests.fips import fips_mode
 
@@ -35,7 +33,7 @@ nonfips_ciphers = ['bf_ecb', 'bf_cbc', 'bf_cfb', 'bf_ofb',
                    # 'rc5_ecb', 'rc5_cbc', 'rc5_cfb', 'rc5_ofb',
                    'des_ecb', 'des_cbc', 'des_cfb', 'des_ofb',
                    'rc4', 'rc2_40_cbc']
-if not fips_mode:  # Disabled algorithms
+if not fips_mode and m2.OPENSSL_VERSION_NUMBER < 0x30000000:  # Disabled algorithms
     ciphers += nonfips_ciphers
 
 
@@ -137,11 +135,13 @@ class EVPTestCase(unittest.TestCase):
                              209168838103121722341657216703105225176,
                              util.octx_to_num(EVP.hmac(b'key', b'data',
                                               algo='md5')))
+
+        if not fips_mode and m2.OPENSSL_VERSION_NUMBER < 0x30000000:
             self.assertEqual(util.octx_to_num(EVP.hmac(b'key', b'data',
-                                              algo='ripemd160')),
+                                                algo='ripemd160')),
                              1176807136224664126629105846386432860355826868536,
                              util.octx_to_num(EVP.hmac(b'key', b'data',
-                                              algo='ripemd160')))
+                                                algo='ripemd160')))
 
         if m2.OPENSSL_VERSION_NUMBER >= 0x90800F:
             self.assertEqual(util.octx_to_num(EVP.hmac(b'key', b'data',
@@ -198,7 +198,7 @@ class EVPTestCase(unittest.TestCase):
         rsa3 = RSA.gen_key(1024, 3, callback=self._gen_callback)
         self.assertNotEqual(rsa.sign(digest), rsa3.sign(digest))
 
-    def test_load_key_string_pubkey(self):
+    def test_load_key_string_pubkey_rsa(self):
         """
         Testing creating a PKey instance from PEM string.
         """
@@ -226,6 +226,63 @@ class EVPTestCase(unittest.TestCase):
         pkey = EVP.PKey()
         with self.assertRaises(ValueError):
             pkey.get_rsa()
+
+    def test_get_ec(self):
+        """
+        Testing retrieving the EC key from the PKey instance.
+        """
+        ec = EC.gen_params(m2.NID_secp521r1)
+        ec.gen_key()
+        self.assertIsInstance(ec, EC.EC)
+        pkey = EVP.PKey()
+        pkey.assign_ec(ec)
+        ec2 = pkey.get_ec()
+        self.assertIsInstance(ec2, EC.EC_pub)
+        self.assertEqual(ec.compute_dh_key(ec), ec2.compute_dh_key(ec2))
+
+        pem = ec.as_pem(callback=self._pass_callback)
+        pem2 = ec2.as_pem()
+        assert pem
+        assert pem2
+        self.assertNotEqual(pem, pem2)
+
+        message = b'This is the message string'
+        digest = hashlib.sha1(message).digest()
+        ec_sign = ec.sign_dsa(digest)
+        ec2_sign = ec.sign_dsa(digest)
+        self.assertEqual(ec.verify_dsa(digest, ec_sign[0], ec_sign[1]), ec.verify_dsa(digest, ec2_sign[0], ec2_sign[1]))
+
+        ec3 = EC.gen_params(m2.NID_secp521r1)
+        ec3.gen_key()
+        ec3_sign = ec.sign_dsa(digest)
+        self.assertEqual(ec.verify_dsa(digest, ec_sign[0], ec_sign[1]), ec.verify_dsa(digest, ec3_sign[0], ec3_sign[1]))
+
+    def test_load_key_string_pubkey_ec(self):
+        """
+        Testing creating a PKey instance from PEM string.
+        """
+        ec = EC.gen_params(m2.NID_secp521r1)
+        ec.gen_key()
+        self.assertIsInstance(ec, EC.EC)
+        ec_pem = BIO.MemoryBuffer()
+        ec.save_pub_key_bio(ec_pem)
+        pkey = EVP.load_key_string_pubkey(ec_pem.read())
+        ec2 = pkey.get_ec()
+        self.assertIsInstance(ec2, EC.EC_pub)
+        pem = ec.as_pem(callback=self._pass_callback)
+        pem2 = ec2.as_pem()
+        assert pem
+        assert pem2
+        self.assertNotEqual(pem, pem2)
+
+    def test_get_ec_fail(self):
+        """
+        Testing trying to retrieve the EC key from the PKey instance
+        when it is not holding a EC Key. Should raise a ValueError.
+        """
+        pkey = EVP.PKey()
+        with self.assertRaises(ValueError):
+            pkey.get_ec()
 
     def test_get_modulus(self):
         pkey = EVP.PKey()
@@ -401,35 +458,49 @@ class CipherTestCase(unittest.TestCase):
 
         self.assertEqual(otxt, ptxt, '%s algorithm cipher test failed' % algo)
 
-    @parameterized.expand(ciphers)
-    def test_ciphers(self, ciph):
-        self.try_algo(ciph)
+    @unittest.skipUnless(six.PY34, "Doesn't support subTest")
+    def test_ciphers(self):
+        for ciph in ciphers:
+            with self.subTest(ciph=ciph):
+                self.try_algo(ciph)
 
-    # # non-compiled (['idea_ecb', 'idea_cbc', 'idea_cfb', 'idea_ofb'])
-    # @parameterized.expand([], skip_on_empty=True)
-    # def test_ciphers_not_compiled_idea(self, ciph):
+    # non-compiled (['idea_ecb', 'idea_cbc', 'idea_cfb', 'idea_ofb'])
+    # @unittest.skipUnless(six.PY34, "Doesn't support subTest")
+    # def test_ciphers_not_compiled_idea(self):
     #     # idea might not be compiled in
-    #     try:
-    #         self.try_algo(ciph)
-    #     except ValueError as e:
-    #         if str(e) != "('unknown cipher', 'idea_ecb')":
-    #             raise
+    #     for ciph in nonfips_ciphers:
+    #         with self.subTest(ciph=ciph):
+    #             try:
+    #                 self.try_algo(ciph)
+    #             except ValueError as e:
+    #                 if str(e) != "('unknown cipher', 'idea_ecb')":
+    #                     raise
+    ## or
+    #             except EVP.EVPError as e:
+    #                     self.skipTest(str(e))
 
-    # # ['rc5_ecb', 'rc5_cbc', 'rc5_cfb', 'rc5_ofb']
-    # @parameterized.expand([], skip_on_empty=True)
+    #################
+    # ['rc5_ecb', 'rc5_cbc', 'rc5_cfb', 'rc5_ofb']
+    # @unittest.skipUnless(six.PY34, "Doesn't support subTest")
     # def test_ciphers_not_compiled_rc5(self, ciph):
     #     # rc5 might not be compiled in
-    #     try:
-    #         self.try_algo(ciph)
-    #     except ValueError as e:
-    #         if str(e) != "('unknown cipher', 'rc5_ofb')":
-    #             raise
+    #     for ciph in []:
+    #         with self.subTest(ciph=ciph):
+    #             try:
+    #                 self.try_algo(ciph)
+    #             except ValueError as e:
+    #                 if str(e) != "('unknown cipher', 'rc5_ofb')":
+    #                     raise
 
     def test_ciphers_nosuch(self):
         with self.assertRaises(ValueError):
             self.try_algo('nosuchalgo4567')
 
-    @parameterized.expand([
+    @unittest.skipUnless(six.PY34, "Doesn't support subTest")
+    def test_AES(self):  # noqa
+        enc = 1
+        dec = 0
+        test_data = [
             # test vectors from rfc 3602
             # Case #1: Encrypting 16 bytes (1 block) using AES-CBC with
             # 128-bit key
@@ -457,55 +528,54 @@ class CipherTestCase(unittest.TestCase):
                 'PT': b'This is a 48-byte message (exactly 3 AES blocks)',
                 'CT': b'd0a02b3836451753d493665d33f0e8862dea54cdb293abc7506939276772f8d5021c19216bad525c8579695d83ba2684',
             },
-            ], name_func=lambda func, num, par: "{}_{}".format(func, num))
-    def test_AES(self, test):  # noqa
-        enc = 1
-        dec = 0
+        ]
 
-        # Test with padding
-        # encrypt
-        k = EVP.Cipher(alg='aes_128_cbc', key=unhexlify(test['KEY']),
-                       iv=unhexlify(test['IV']), op=enc)
-        pbuf = io.BytesIO(test['PT'])
-        cbuf = io.BytesIO()
-        ciphertext = hexlify(self.cipher_filter(k, pbuf, cbuf))
-        cipherpadding = ciphertext[len(test['PT']) * 2:]
-        # Remove the padding from the end
-        ciphertext = ciphertext[:len(test['PT']) * 2]
-        pbuf.close()
-        cbuf.close()
-        self.assertEqual(ciphertext, test['CT'])
+        for test in test_data:
+            with self.subTest(msg="test_AES_{}".format(test_data.index(test))):
+                # Test with padding
+                # encrypt
+                k = EVP.Cipher(alg='aes_128_cbc', key=unhexlify(test['KEY']),
+                               iv=unhexlify(test['IV']), op=enc)
+                pbuf = io.BytesIO(test['PT'])
+                cbuf = io.BytesIO()
+                ciphertext = hexlify(self.cipher_filter(k, pbuf, cbuf))
+                cipherpadding = ciphertext[len(test['PT']) * 2:]
+                # Remove the padding from the end
+                ciphertext = ciphertext[:len(test['PT']) * 2]
+                pbuf.close()
+                cbuf.close()
+                self.assertEqual(ciphertext, test['CT'])
 
-        # decrypt
-        j = EVP.Cipher(alg='aes_128_cbc', key=unhexlify(test['KEY']),
-                       iv=unhexlify(test['IV']), op=dec)
-        pbuf = io.BytesIO()
-        cbuf = io.BytesIO(unhexlify(test['CT'] + cipherpadding))
-        plaintext = self.cipher_filter(j, cbuf, pbuf)
-        pbuf.close()
-        cbuf.close()
-        self.assertEqual(plaintext, test['PT'])
+                # decrypt
+                j = EVP.Cipher(alg='aes_128_cbc', key=unhexlify(test['KEY']),
+                               iv=unhexlify(test['IV']), op=dec)
+                pbuf = io.BytesIO()
+                cbuf = io.BytesIO(unhexlify(test['CT'] + cipherpadding))
+                plaintext = self.cipher_filter(j, cbuf, pbuf)
+                pbuf.close()
+                cbuf.close()
+                self.assertEqual(plaintext, test['PT'])
 
-        # Test without padding
-        # encrypt
-        k = EVP.Cipher(alg='aes_128_cbc', key=unhexlify(test['KEY']),
-                       iv=unhexlify(test['IV']), op=enc, padding=False)
-        pbuf = io.BytesIO(test['PT'])
-        cbuf = io.BytesIO()
-        ciphertext = hexlify(self.cipher_filter(k, pbuf, cbuf))
-        pbuf.close()
-        cbuf.close()
-        self.assertEqual(ciphertext, test['CT'])
+                # Test without padding
+                # encrypt
+                k = EVP.Cipher(alg='aes_128_cbc', key=unhexlify(test['KEY']),
+                               iv=unhexlify(test['IV']), op=enc, padding=False)
+                pbuf = io.BytesIO(test['PT'])
+                cbuf = io.BytesIO()
+                ciphertext = hexlify(self.cipher_filter(k, pbuf, cbuf))
+                pbuf.close()
+                cbuf.close()
+                self.assertEqual(ciphertext, test['CT'])
 
-        # decrypt
-        j = EVP.Cipher(alg='aes_128_cbc', key=unhexlify(test['KEY']),
-                       iv=unhexlify(test['IV']), op=dec, padding=False)
-        pbuf = io.BytesIO()
-        cbuf = io.BytesIO(unhexlify(test['CT']))
-        plaintext = self.cipher_filter(j, cbuf, pbuf)
-        pbuf.close()
-        cbuf.close()
-        self.assertEqual(plaintext, test['PT'])
+                # decrypt
+                j = EVP.Cipher(alg='aes_128_cbc', key=unhexlify(test['KEY']),
+                               iv=unhexlify(test['IV']), op=dec, padding=False)
+                pbuf = io.BytesIO()
+                cbuf = io.BytesIO(unhexlify(test['CT']))
+                plaintext = self.cipher_filter(j, cbuf, pbuf)
+                pbuf.close()
+                cbuf.close()
+                self.assertEqual(plaintext, test['PT'])
 
     def test_AES_ctr(self):  # noqa
         # In CTR mode, encrypt and decrypt are actually the same

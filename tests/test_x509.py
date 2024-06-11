@@ -15,7 +15,7 @@ import os
 import time
 import warnings
 
-from M2Crypto import ASN1, BIO, EVP, RSA, Rand, X509, m2, six  # noqa
+from M2Crypto import ASN1, BIO, EVP, RSA, Rand, X509, m2, six, util  # noqa
 from tests import unittest
 
 log = logging.getLogger(__name__)
@@ -219,14 +219,23 @@ class X509TestCase(unittest.TestCase):
         req4 = X509.load_request('tests/tmp_request.der',
                                  format=X509.FORMAT_DER)
         os.remove('tests/tmp_request.der')
+        if m2.OPENSSL_VERSION_NUMBER >= 0x30000000:
+            req2t = req2.as_text().replace(' Public-Key: (1024 bit)', ' RSA Public-Key: (1024 bit)')
+            req3t = req3.as_text().replace(' Public-Key: (1024 bit)', ' RSA Public-Key: (1024 bit)')
+            req4t = req3.as_text().replace(' Public-Key: (1024 bit)', ' RSA Public-Key: (1024 bit)')
+        else:
+            req2t = req2.as_text()
+            req3t = req3.as_text()
+            req4t = req3.as_text()
+
         self.assertEqual(req.as_pem(), req2.as_pem())
-        self.assertEqual(req.as_text(), req2.as_text())
+        self.assertEqual(req.as_text(), req2t)
         self.assertEqual(req.as_der(), req2.as_der())
         self.assertEqual(req.as_pem(), req3.as_pem())
-        self.assertEqual(req.as_text(), req3.as_text())
+        self.assertEqual(req.as_text(), req3t)
         self.assertEqual(req.as_der(), req3.as_der())
         self.assertEqual(req.as_pem(), req4.as_pem())
-        self.assertEqual(req.as_text(), req4.as_text())
+        self.assertEqual(req.as_text(), req4t)
         self.assertEqual(req.as_der(), req4.as_der())
         self.assertEqual(req.get_version(), 0)
         req.set_version(1)
@@ -234,6 +243,7 @@ class X509TestCase(unittest.TestCase):
         req.set_version(0)
         self.assertEqual(req.get_version(), 0)
 
+    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
     def test_mkcert(self):
         for utc in (True, False):
             req, pk = self.mkreq(1024)
@@ -248,15 +258,20 @@ class X509TestCase(unittest.TestCase):
             cert.set_version(2)
             cert.set_subject(sub)
             t = int(time.time()) + time.timezone
+            log.debug('t = %s',
+                time.strftime("%a, %d %b %Y %H:%M:%S %z", time.localtime(t)))
             if utc:
                 now = ASN1.ASN1_UTCTIME()
             else:
                 now = ASN1.ASN1_TIME()
             now.set_time(t)
+            log.debug('now = %s', now)
             now_plus_year = ASN1.ASN1_TIME()
             now_plus_year.set_time(t + 60 * 60 * 24 * 365)
+            log.debug('now_plus_year = %s', now_plus_year)
             cert.set_not_before(now)
             cert.set_not_after(now_plus_year)
+            log.debug('cert = %s', cert.get_not_before())
             self.assertEqual(str(cert.get_not_before()), str(now))
             self.assertEqual(str(cert.get_not_after()), str(now_plus_year))
 
@@ -370,9 +385,9 @@ class X509TestCase(unittest.TestCase):
             self.assertTrue(proxycert.verify(pk2))
             self.assertEqual(proxycert.get_ext_at(0).get_name(),
                              'proxyCertInfo')
-            self.assertEqual(proxycert.get_ext_at(0).get_value(),
+            self.assertEqual(proxycert.get_ext_at(0).get_value().strip(),
                              'Path Length Constraint: infinite\n' +
-                             'Policy Language: Inherit all\n')
+                             'Policy Language: Inherit all')
             self.assertEqual(proxycert.get_ext_count(), 1,
                              proxycert.get_ext_count())
             self.assertEqual(proxycert.get_subject().as_text(),
@@ -572,9 +587,26 @@ class X509TestCase(unittest.TestCase):
         self.assertEqual(cert.get_serial_number(),
                          127614157056681299805556476275995414779)
 
+    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
     def test_date_after_2050_working(self):
         cert = X509.load_cert('tests/bad_date_cert.crt')
         self.assertEqual(str(cert.get_not_after()), 'Feb  9 14:57:46 2116 GMT')
+
+    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
+    def test_date_reference_counting(self):
+        """x509_get_not_before() and x509_get_not_after() return internal
+        pointers into X509. As the returned ASN1_TIME objects do not store any
+        reference to the X509 itself, they become invalid when the last
+        reference to X509 goes out of scope and the underlying memory is freed.
+
+        https://gitlab.com/m2crypto/m2crypto/-/issues/325
+        """
+        cert = X509.load_cert('tests/bad_date_cert.crt')
+        not_before = cert.get_not_before()
+        not_after = cert.get_not_after()
+        del cert
+        self.assertEqual(str(not_before), 'Mar  4 14:57:46 2016 GMT')
+        self.assertEqual(str(not_after), 'Feb  9 14:57:46 2116 GMT')
 
     def test_easy_rsa_generated(self):
         """ Test loading a cert generated by easy RSA.
@@ -586,6 +618,12 @@ class X509TestCase(unittest.TestCase):
 
 
 class X509StackTestCase(unittest.TestCase):
+    def setUp(self):
+        if m2.OPENSSL_VERSION_NUMBER >= 0x30000000:
+            self.expected_subject = '/DC=org/DC=doegrids/OU=Services/CN=host\\/bosshog.lbl.gov'
+        else:
+            self.expected_subject = '/DC=org/DC=doegrids/OU=Services/CN=host/bosshog.lbl.gov'
+
     def test_make_stack_from_der(self):
         with open("tests/der_encoded_seq.b64", 'rb') as f:
             b64 = f.read()
@@ -607,7 +645,7 @@ class X509StackTestCase(unittest.TestCase):
         subject = cert.get_subject()
         self.assertEqual(
             str(subject),
-            "/DC=org/DC=doegrids/OU=Services/CN=host/bosshog.lbl.gov")
+            self.expected_subject)
 
     def test_make_stack_check_num(self):
         with open("tests/der_encoded_seq.b64", 'rb') as f:
@@ -629,7 +667,7 @@ class X509StackTestCase(unittest.TestCase):
         subject = cert.get_subject()
         self.assertEqual(
             str(subject),
-            "/DC=org/DC=doegrids/OU=Services/CN=host/bosshog.lbl.gov")
+            self.expected_subject)
 
     def test_make_stack(self):
         stack = X509.X509_Stack()

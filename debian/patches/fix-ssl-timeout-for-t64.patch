@@ -1,0 +1,50 @@
+Description: Fix SSL timeout struct on 32-bit systems with 64-bit time_t
+Author: Spyros Seimenis <spyros.seimenis@canonical.com>
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1072341
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/m2crypto/+bug/2059156
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- m2crypto-0.40.1.orig/src/M2Crypto/SSL/timeout.py
++++ m2crypto-0.40.1/src/M2Crypto/SSL/timeout.py
+@@ -9,6 +9,7 @@ __all__ = ['DEFAULT_TIMEOUT', 'timeout',
+ 
+ import sys
+ import struct
++import platform
+ 
+ DEFAULT_TIMEOUT = 600  # type: int
+ 
+@@ -25,7 +26,11 @@ class timeout(object):
+             millisec = int(self.sec * 1000 + round(float(self.microsec) / 1000))
+             binstr = struct.pack('l', millisec)
+         else:
+-            binstr = struct.pack('ll', self.sec, self.microsec)
++            if platform.machine() in ["i386", "i686"]:
++                binstr = struct.pack('ll', self.sec, self.microsec)
++            else:
++                binstr = struct.pack('qq', self.sec, self.microsec)
++
+         return binstr
+ 
+ 
+@@ -38,7 +43,10 @@ def struct_to_timeout(binstr):
+         sec = int(millisec / 1000)
+         microsec = (millisec % 1000) * 1000
+     else:
+-        (sec, microsec) = struct.unpack('ll', binstr)
++         if platform.machine() in ["i386", "i686"]:
++            (sec, microsec) = struct.unpack('ll', binstr)
++         else:
++            (sec, microsec) = struct.unpack('qq', binstr)
+     return timeout(sec, microsec)
+ 
+ 
+@@ -47,4 +55,7 @@ def struct_size():
+     if sys.platform == 'win32':
+         return struct.calcsize('l')
+     else:
+-        return struct.calcsize('ll')
++        if platform.machine() in ["i386", "i686"]:
++            return struct.calcsize('ll')
++        else:
++            return struct.calcsize('qq')

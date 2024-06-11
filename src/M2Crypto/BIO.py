@@ -196,6 +196,7 @@ class MemoryBuffer(BIO):
 
     def read(self, size=0):
         # type: (int) -> bytes
+        m2.err_clear_error();
         if not self.readable():
             raise IOError('cannot read')
         if size:
@@ -267,11 +268,6 @@ class File(BIO):
         :return: 0 for success, and -1 for failure
         """
         return super(File, self).reset()
-
-    def __del__(self):
-        if not self.closed:
-            m2.bio_free(self.bio)
-
 
 def openfile(filename, mode='rb'):
     # type: (AnyStr, AnyStr) -> File

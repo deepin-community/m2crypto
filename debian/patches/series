@@ -1,8 +1,2 @@
-0001-import-inspect-in-urllib-2.patch
-0002-Mark-some-tests-as-expected-failure-with-openssl-v3.patch
-0003-these-are-being-removed-upstream-in-Openssl-in-M2cry.patch
-0004-Adjust-some-test-suite-expectations-for-openssl-v3.patch
-0005-Force-enable-tlsv1-for-the-tls1-tests.patch
-0006-Skip-TLSv1-Test.patch
-0007-Mitigate-the-Bleichenbacher-timing-attacks-in-the-RS.patch
-0008-Import-setuptools-before-distutils.patch
+test-smime-Rewind-BIO-before-repeadetly-invoking-ver.patch
+fix-ssl-timeout-for-t64.patch

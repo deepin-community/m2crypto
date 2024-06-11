@@ -7,6 +7,9 @@ Copyright (c) 2000 Ng Pheng Siong. All rights reserved."""
 import os
 import multiprocessing
 
+from platform import system
+from sys import version_info
+from M2Crypto import m2, six
 from M2Crypto.BIO import MemoryBuffer
 from tests import unittest
 
@@ -16,7 +19,23 @@ class TimeLimitExpired(Exception):
 
 
 def time_limit(timeout, func, exc_msg, *args, **kwargs):
-    p = multiprocessing.Process(target=func)
+
+    # multiprocessing.get_context() available in Python >= 3.4
+    if six.PY3:
+        # Python >=3.8 on MacOS changed start_method to 'spawn' as default.
+        #   This creates a new context with the previous 'fork'
+        #   start_method. Fixes issue #286.
+        if system() == 'Darwin' and version_info.major >= 3 and version_info.minor >= 8:
+            start_method = 'fork'
+        else:
+            # use default context
+            start_method = None
+
+        mp = multiprocessing.get_context(start_method)
+    else:
+        mp = multiprocessing
+
+    p = mp.Process(target=func)
     p.start()
     p.join(timeout)
     if p.is_alive():
@@ -90,6 +109,7 @@ class MemoryBufferTestCase(unittest.TestCase):
         mb.close()
         with self.assertRaises(IOError):
             mb.write(self.data)
+        m2.err_clear_error()
         assert mb.readable() and not mb.writeable()
 
     def test_readline(self):
@@ -102,11 +122,11 @@ class MemoryBufferTestCase(unittest.TestCase):
 
 def run_test(*args, **kwargs):
     sep = os.linesep.encode()
-    with MemoryBuffer(b'hello\nworld\n') as mb:
+    with MemoryBuffer(b'hello' + sep + b'world' + sep) as mb:
         assert mb.readable()
         assert mb.readline() == b'hello' + sep
         assert mb.readline() == b'world' + sep
-    with MemoryBuffer(b'hello\nworld\n') as mb:
+    with MemoryBuffer(b'hello' + sep + b'world' + sep) as mb:
         assert mb.readlines() == [b'hello' + sep, b'world' + sep]
 
 def suite():
