@@ -1,9 +1,9 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: M2Crypto
 Upstream-Contact: Matej Cepl <mcepl@cepl.eu>
-Source: https://pypi.python.org/pypi/M2Crypto
+Source: https://git.sr.ht/~mcepl/m2crypto/
 Files-Excluded: doc/html
-                M2Crypto.egg-info/
+                doc/doctrees
 
 Files: *
 Copyright: 1999-2004 Ng Pheng Siong <ngps@sandbox.rulemaker.net>

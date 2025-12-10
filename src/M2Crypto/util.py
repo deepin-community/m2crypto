@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 """
     M2Crypto utility routines.
 
@@ -13,10 +13,13 @@ from __future__ import absolute_import
 
 import binascii
 import logging
+import platform
 import struct
 import sys
+import struct
+import unittest
 
-from M2Crypto import m2, six
+from M2Crypto import m2
 from typing import Any, Optional, TextIO, Tuple, Union  # noqa
 # see https://github.com/python/typeshed/issues/222
 AddrType = Union[Tuple[str, int], str]
@@ -30,9 +33,25 @@ class UtilError(Exception):
 
 m2.util_init(UtilError)
 
+def is_libc_musl():
+    # This is wrong, but unfortunately Python doesn't give us anything better
+    # gh#python/cpython#87414
+    return platform.libc_ver() == ("", "")
+
 def is_32bit():
     # type: () -> bool
-    return (struct.calcsize("P") * 8) == 32
+    # or alternatively (slightly slower)
+    # (struct.calcsize("P") * 8) == 32
+    return not(sys.maxsize > 2**32)
+
+def expectedFailureIf(condition):
+    """The test is marked as an expectedFailure if the condition is satisfied."""
+    def wrapper(func):
+        if condition:
+            return unittest.expectedFailure(func)
+        else:
+            return func
+    return wrapper
 
 def pkcs5_pad(data, blklen=8):
     # type: (str, int) -> str
@@ -50,7 +69,7 @@ def pkcs7_pad(data, blklen):
 
 def bin_to_hex(b):
     # type: (bytes) -> str
-    return six.ensure_text(binascii.b2a_base64(b)[:-1])
+    return binascii.b2a_base64(b)[:-1].decode()
 
 
 def octx_to_num(x):

@@ -1,2 +1,2 @@
 Tests: python3-m2crypto
-Depends: @, @builddeps@
+Depends: @, openssl, python3-all, python3-pytest

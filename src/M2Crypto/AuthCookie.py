@@ -8,10 +8,11 @@ import logging
 import re
 import time
 
-from M2Crypto import Rand, m2, six, util
-from M2Crypto.six.moves.http_cookies import SimpleCookie
+from http.cookies import SimpleCookie
 
-from typing import re as type_re, AnyStr, Optional, Union  # noqa
+from M2Crypto import Rand, m2, util
+
+from typing import Pattern, AnyStr, Optional, Union  # noqa
 
 _MIX_FORMAT = 'exp=%f&data=%s&digest='
 _MIX_RE = re.compile(r'exp=(\d+\.\d+)&data=(.+)&digest=(\S*)')
@@ -25,7 +26,7 @@ def mix(expiry, data, format=_MIX_FORMAT):
 
 
 def unmix(dough, regex=_MIX_RE):
-    # type: (AnyStr, type_re) -> object
+    # type: (AnyStr, Pattern) -> object
     mo = regex.match(dough)
     if mo:
         return float(mo.group(1)), mo.group(2)
@@ -34,7 +35,7 @@ def unmix(dough, regex=_MIX_RE):
 
 
 def unmix3(dough, regex=_MIX_RE):
-    # type: (AnyStr, type_re) -> Optional[tuple[float, AnyStr, AnyStr]]
+    # type: (AnyStr, Pattern) -> Optional[tuple[float, AnyStr, AnyStr]]
     mo = regex.match(dough)
     if mo:
         return float(mo.group(1)), mo.group(2), mo.group(3)
@@ -55,7 +56,7 @@ class AuthCookieJar(object):
 
     def _hmac(self, key, data):
         # type: (bytes, str) -> str
-        return util.bin_to_hex(m2.hmac(key, six.ensure_binary(data), m2.sha1()))
+        return util.bin_to_hex(m2.hmac(key, data.encode(), m2.sha1()))
 
     def makeCookie(self, expiry, data):
         # type: (float, str) -> AuthCookie
@@ -66,7 +67,7 @@ class AuthCookieJar(object):
         :param data: cookie content
         :return: AuthCookie object
         """
-        if not isinstance(expiry, (six.integer_types, float)):
+        if not isinstance(expiry, (int, float)):
             raise ValueError('Expiration time must be number, not "%s' % expiry)
         dough = mix(expiry, data)
         return AuthCookie(expiry, data, dough, self._hmac(self._key, dough))
@@ -153,7 +154,7 @@ class AuthCookie(object):
     def isExpired(self):
         # type: () -> bool
         """Return 1 if the cookie has expired, 0 otherwise."""
-        return isinstance(self._expiry, (float, six.integer_types)) and \
+        return isinstance(self._expiry, (float, int)) and \
             (time.time() > self._expiry)
 
     # Following two methods are for WebKit only.

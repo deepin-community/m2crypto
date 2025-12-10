@@ -1,3 +1,39 @@
+0.42.0 - 2024-08-10
+-------------------
+
+- allow ASN1_{Integer,String} be initialized directly
+- minimal infrastructure for type hints for a C extension and
+  some type hints for some basic modules
+- time_t on 32bit Linux is 32bit (integer) not 64bit (long)
+- EOS for CentOS 7
+- correct checking for OpenSSL version number on Windows
+- make compatible with Python 3.13 (replace PyEval_CallObject
+  with PyObject_CallObject)
+- fix typo in extern function signature (and proper type of
+  engine_ctrl_cmd_string())
+- move the package to Sorucehut
+- setup CI to use Sourcehut CI
+- setup CI on GitLab for Windows as well (remove Appveyor)
+- initial draft of documentation for migration to pyca/cryptography
+- fix Read the Docs configuration (contributed kindly by Facundo
+  Tuesca)
+
+0.41.0 - 2024-02-13
+-------------------
+
+- fix: test/smime: Rewind BIO before repeadetly invoking verify.
+- feat: React to the possible error when calling BIO_set_cipher(3).
+- Return M2Crypto.version_info
+- Revert 957df43e (workaround for the problem in OpenSSL, which is not needed any more)
+- Fix Windows builds (fix #319)
+- feat: Remove py2k constructs in setup.py
+- Fix mkpath call (compatibility with Python >= 3.2)
+- Remove generated files from sources
+- feat!: Remove six and make whole project Py3k only (see #328)
+- Don't use setup.py commands anymore.
+- 32bit Python actually has Y2K38 problem, because time_t is long int (see #341)
+- From TAP back to the standard unittest (gh#python-tap/tappy#136)
+
 0.40.1 - 2023-10-25
 -------------------
 

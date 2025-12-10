@@ -1,8 +1,9 @@
 *.pyc
+*.txt
 *~
 /build
 /dist
-/M2Crypto/*_m2crypto*.so
+/src/M2Crypto/*_m2crypto*.so
 M2Crypto.egg-info
 /.eggs/
 /EGG-INFO
@@ -13,3 +14,4 @@ M2Crypto.egg-info
 MANIFEST
 *.tap
 src/SWIG/_m2crypto_wrap.c
+!*requirements.txt

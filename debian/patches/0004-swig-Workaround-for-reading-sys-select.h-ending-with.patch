@@ -1,0 +1,45 @@
+From: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
+Date: Fri, 10 Jan 2025 11:14:45 +0100
+Subject: [PATCH 4/4] swig: Workaround for reading sys/select.h ending with
+ wrong types.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+| src/SWIG/_m2crypto_wrap.c: In function ‘_wrap_fd_set___fds_bits_set’:
+| src/SWIG/_m2crypto_wrap.c:11872:88: error: ‘fd_set’ has no member named ‘__fds_bits’; did you mean ‘fds_bits’?
+| 11872 |       for (; ii < (size_t)1024/(8*(int) sizeof(__fd_mask)); ++ii) *(__fd_mask *)&arg1->__fds_bits[ii] = *((__fd_mask *)arg2 + ii);
+|       |                                                                                        ^~~~~~~~~~
+|       |                                                                                        fds_bits
+| src/SWIG/_m2crypto_wrap.c: In function ‘_wrap_fd_set___fds_bits_get’:
+| src/SWIG/_m2crypto_wrap.c:11897:48: error: ‘fd_set’ has no member named ‘__fds_bits’; did you mean ‘fds_bits’?
+| 11897 |   result = (__fd_mask *)(__fd_mask *) ((arg1)->__fds_bits);
+|       |                                                ^~~~~~~~~~
+|       |                                                fds_bits
+
+Suggested by Adrien Nader <adrien@notk.org> in #1091133.
+
+Signed-off-by: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
+---
+ setup.py                     | 2 ++
+ system_shadowing/sys/types.h | 0
+ setup.py                     |    2 ++
+ system_shadowing/sys/types.h |    1 +
+ 2 files changed, 3 insertions(+)
+ create mode 100644 system_shadowing/sys/types.h
+
+--- a/setup.py
++++ b/setup.py
+@@ -138,6 +138,8 @@ requires_list = []
+                 # this shortly to come up with a better fix.
+                 self.swig_opts.append('-D_MSC_VER=1500')
+ 
++        self.swig_opts.append('-Isystem_shadowing')
++
+         log.debug('self.openssl_path = %s', self.openssl_path)
+         log.debug('self.bundledlls = %s', self.bundledlls)
+ 
+--- /dev/null
++++ b/system_shadowing/sys/types.h
+@@ -0,0 +1 @@
++/* empty */

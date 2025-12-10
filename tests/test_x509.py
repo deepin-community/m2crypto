@@ -12,10 +12,12 @@ Author: Heikki Toivonen
 import base64
 import logging
 import os
+import platform
 import time
 import warnings
 
-from M2Crypto import ASN1, BIO, EVP, RSA, Rand, X509, m2, six, util  # noqa
+from M2Crypto import ASN1, BIO, EVP, RSA, Rand, X509, m2  # noqa
+from M2Crypto.util import is_32bit, is_libc_musl, expectedFailureIf
 from tests import unittest
 
 log = logging.getLogger(__name__)
@@ -243,7 +245,7 @@ class X509TestCase(unittest.TestCase):
         req.set_version(0)
         self.assertEqual(req.get_version(), 0)
 
-    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
+    @unittest.skipIf(platform.system() == 'Windows', 'Skip on Windows. TODO')
     def test_mkcert(self):
         for utc in (True, False):
             req, pk = self.mkreq(1024)
@@ -587,19 +589,21 @@ class X509TestCase(unittest.TestCase):
         self.assertEqual(cert.get_serial_number(),
                          127614157056681299805556476275995414779)
 
-    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
+    @unittest.skipIf(platform.system() == 'Windows', 'Skip on Windows. TODO')
+    @expectedFailureIf(is_32bit() and not is_libc_musl())
     def test_date_after_2050_working(self):
         cert = X509.load_cert('tests/bad_date_cert.crt')
         self.assertEqual(str(cert.get_not_after()), 'Feb  9 14:57:46 2116 GMT')
 
-    @unittest.skipIf(util.is_32bit(), 'Skip on 32bit architectures.')
+    @unittest.skipIf(platform.system() == 'Windows', 'Skip on Windows. TODO')
+    @expectedFailureIf(is_32bit() and not is_libc_musl())
     def test_date_reference_counting(self):
         """x509_get_not_before() and x509_get_not_after() return internal
         pointers into X509. As the returned ASN1_TIME objects do not store any
         reference to the X509 itself, they become invalid when the last
         reference to X509 goes out of scope and the underlying memory is freed.
 
-        https://gitlab.com/m2crypto/m2crypto/-/issues/325
+        https://todo.sr.ht/~mcepl/m2crypto/325
         """
         cert = X509.load_cert('tests/bad_date_cert.crt')
         not_before = cert.get_not_before()
@@ -630,10 +634,7 @@ class X509StackTestCase(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', DeprecationWarning)
-            if six.PY3:
-                seq = base64.decodebytes(b64)
-            else:
-                seq = base64.decodestring(b64)
+            seq = base64.decodebytes(b64)
 
         stack = X509.new_stack_from_der(seq)
         cert = stack.pop()
@@ -653,10 +654,7 @@ class X509StackTestCase(unittest.TestCase):
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', DeprecationWarning)
-            if six.PY3:
-                seq = base64.decodebytes(b64)
-            else:
-                seq = base64.decodestring(b64)
+            seq = base64.decodebytes(b64)
 
         stack = X509.new_stack_from_der(seq)
         num = len(stack)

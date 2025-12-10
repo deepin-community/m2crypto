@@ -8,7 +8,7 @@ import io
 import logging
 from typing import Any, AnyStr, Callable, Iterable, Optional, Union  # noqa
 
-from M2Crypto import m2, six
+from M2Crypto import m2
 
 log = logging.getLogger('BIO')
 
@@ -52,7 +52,7 @@ class BIO(object):
         return not self.closed
 
     def read(self, size=None):
-        # type: (int) -> Union[bytes, bytearray]
+        # type: (Optional[int]) -> Union[bytes, bytearray]
         if not self.readable():
             raise IOError('cannot read')
         if size is None:
@@ -75,8 +75,7 @@ class BIO(object):
         if not self.readable():
             raise IOError('cannot read')
         buf = m2.bio_gets(self.bio, size)
-        buf = '' if buf is None else buf
-        return six.ensure_binary(buf)
+        return '' if buf is None else buf
 
     def readlines(self, sizehint='ignored'):
         # type: (Union[AnyStr, int]) -> Iterable[bytes]
@@ -87,7 +86,7 @@ class BIO(object):
             buf = m2.bio_gets(self.bio, 4096)
             if buf is None:
                 break
-            lines.append(six.ensure_binary(buf))
+            lines.append(buf)
         return lines
 
     def writeable(self):
@@ -103,7 +102,7 @@ class BIO(object):
         """
         if not self.writeable():
             raise IOError('cannot write')
-        if isinstance(data, six.text_type):
+        if isinstance(data, str):
             data = data.encode('utf8')
         return m2.bio_write(self.bio, data)
 
@@ -226,7 +225,7 @@ class File(BIO):
         # type: (Union[io.BytesIO, AnyStr], int, AnyStr) -> None
         super(File, self).__init__(self, _pyfree=1)
 
-        if isinstance(pyfile, six.string_types):
+        if isinstance(pyfile, str):
             pyfile = open(pyfile, mode)
 
         # This is for downward compatibility, but I don't think, that it is
@@ -352,7 +351,10 @@ class CipherStream(BIO):
                 key = key.encode('utf8')
             if not isinstance(iv, bytes):
                 iv = iv.encode('utf8')
-        m2.bio_set_cipher(self.bio, cipher(), key, iv, int(op))
+        try:
+            m2.bio_set_cipher(self.bio, cipher(), key, iv, int(op))
+        except (OSError, ValueError) as ex:
+            raise BIOError("BIOError: {}".format(str(ex)))
         m2.bio_push(self.bio, self.obio._ptr())
 
 
@@ -366,7 +368,10 @@ class SSLBio(BIO):
         self.closed = 0
 
     def set_ssl(self, conn, close_flag=m2.bio_noclose):
-        ## type: (Connection, int) -> None
+        # type: (Any, int) -> None
+        # conn should actually be SSL.Connection, but we cannot import
+        # it here without getting into some serious circular dependency
+        # business.
         """
         Sets the bio to the SSL pointer which is
         contained in the connection object.
