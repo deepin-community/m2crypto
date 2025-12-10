@@ -1,3 +1,0 @@
-# binary data
-very-long-line-length-in-source-file * > 512 [doc/doctrees/*.doctree:*]
-very-long-line-length-in-source-file * > 512 [doc/doctrees/*.pickle:*]

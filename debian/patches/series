@@ -1,2 +1,7 @@
-test-smime-Rewind-BIO-before-repeadetly-invoking-ver.patch
+expect-failure-for-mktime-on-i386-only.patch
 fix-ssl-timeout-for-t64.patch
+0001-test_x509-Use-only-X509_VERSION_1-0-as-version-for-C.patch
+0002-fix-EC-raise-ValueError-when-load_key_bio-cannot-rea.patch
+0003-fix-EC-raise-IOError-instead-when-load_key_bio-canno.patch
+0004-swig-Workaround-for-reading-sys-select.h-ending-with.patch
+tests-do-not-pass-debug-to-openssl.patch

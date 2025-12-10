@@ -4,7 +4,7 @@ export PYBUILD_NAME=m2crypto
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
 export PYBUILD_TEST_ARGS=--ignore tests/test_ssl.py
-export PYBUILD_AFTER_BUILD_python3=PYTHONPATH={build_dir} http_proxy='127.0.0.1:9' python3 -m sphinx -N doc debian/python-m2crypto-doc/usr/share/doc/python-m2crypto-doc/html
+export PYBUILD_AFTER_BUILD=PYTHONPATH={build_dir} http_proxy='127.0.0.1:9' python3 -m sphinx -N doc html
 
 export OPENSSL_CONF=$(CURDIR)/debian/openssl.cnf
 
@@ -13,7 +13,7 @@ export https_proxy=
 # override settings from pybuild, unset them is needed for tests
 
 %:
-	dh $@ --with python3 --buildsystem=pybuild
+	dh $@ --buildsystem=pybuild
 
 override_dh_installdocs:
 	rst2html -r 5 README.rst .pybuild/README.html

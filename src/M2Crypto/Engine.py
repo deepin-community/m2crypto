@@ -8,7 +8,7 @@ Pavel Shramov
 IMEC MSU
 """
 
-from M2Crypto import EVP, Err, X509, m2, six
+from M2Crypto import EVP, Err, X509, m2
 from typing import AnyStr, Callable, Optional  # noqa
 
 
@@ -56,9 +56,10 @@ class Engine(object):
     def ctrl_cmd_string(self, cmd, arg, optional=0):
         # type: (AnyStr, Optional[AnyStr], int) -> None
         """Call ENGINE_ctrl_cmd_string"""
-        cmd = six.ensure_str(cmd)
-        if arg is not None:
-            arg = six.ensure_str(arg)
+        if isinstance(cmd, bytes):
+            cmd = cmd.decode()
+        if arg is not None and isinstance(arg, bytes):
+            arg = arg.decode()
         if not m2.engine_ctrl_cmd_string(self._ptr, cmd, arg, optional):
             raise EngineError(Err.get_error())
 
@@ -120,7 +121,7 @@ class Engine(object):
 def load_dynamic_engine(id, sopath):
     # type: (bytes, AnyStr) -> Engine
     """Load and return dymanic engine from sopath and assign id to it"""
-    if isinstance(sopath, six.text_type):
+    if isinstance(sopath, str):
         sopath = sopath.encode('utf8')
     m2.engine_load_dynamic()
     e = Engine('dynamic')

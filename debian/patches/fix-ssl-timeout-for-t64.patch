@@ -4,30 +4,32 @@ Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1072341
 Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/m2crypto/+bug/2059156
 ---
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
---- m2crypto-0.40.1.orig/src/M2Crypto/SSL/timeout.py
-+++ m2crypto-0.40.1/src/M2Crypto/SSL/timeout.py
-@@ -9,6 +9,7 @@ __all__ = ['DEFAULT_TIMEOUT', 'timeout',
+--- a/src/M2Crypto/SSL/timeout.py
++++ b/src/M2Crypto/SSL/timeout.py
+@@ -9,6 +9,7 @@
  
  import sys
  import struct
 +import platform
  
- DEFAULT_TIMEOUT = 600  # type: int
+ from M2Crypto.util import is_32bit, is_libc_musl
  
-@@ -25,7 +26,11 @@ class timeout(object):
+@@ -27,10 +28,12 @@
              millisec = int(self.sec * 1000 + round(float(self.microsec) / 1000))
              binstr = struct.pack('l', millisec)
          else:
--            binstr = struct.pack('ll', self.sec, self.microsec)
-+            if platform.machine() in ["i386", "i686"]:
-+                binstr = struct.pack('ll', self.sec, self.microsec)
+-            if is_32bit() and not is_libc_musl():
++            if platform.machine() in ["i386", "i686"] and not is_libc_musl():
+                 binstr = struct.pack('ii', self.sec, self.microsec)
+-            else:
++            elif platform.machine() in ["i386", "i686"]:
+                 binstr = struct.pack('ll', self.sec, self.microsec)
 +            else:
 +                binstr = struct.pack('qq', self.sec, self.microsec)
-+
          return binstr
  
  
-@@ -38,7 +43,10 @@ def struct_to_timeout(binstr):
+@@ -43,7 +46,10 @@
          sec = int(millisec / 1000)
          microsec = (millisec % 1000) * 1000
      else:
@@ -39,7 +41,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
      return timeout(sec, microsec)
  
  
-@@ -47,4 +55,7 @@ def struct_size():
+@@ -52,4 +58,7 @@
      if sys.platform == 'win32':
          return struct.calcsize('l')
      else:

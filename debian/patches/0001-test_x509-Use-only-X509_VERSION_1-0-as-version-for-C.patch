@@ -1,0 +1,28 @@
+From: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
+Date: Sun, 20 Oct 2024 21:19:33 +0200
+Subject: [PATCH 1/4] test_x509: Use only X509_VERSION_1 (0) as version for
+ CSR.
+
+Upstream: e939d914f60c211a549d43d6d44cd58b7b7ea622
+
+RFC 2986 only defines a single version for CSRs: X509_VERSION_1 (0).
+OpenSSL starting with 3.4 rejects everything else.
+
+Remove the tests where X509_VERSION_2 (1) is used X509_REQ_set_version.
+
+Signed-off-by: Sebastian Andrzej Siewior <sebastian@breakpoint.cc>
+---
+ tests/test_x509.py |    2 --
+ 1 file changed, 2 deletions(-)
+
+--- a/tests/test_x509.py
++++ b/tests/test_x509.py
+@@ -240,8 +240,6 @@ log = logging.getLogger(__name__)
+         self.assertEqual(req.as_text(), req4t)
+         self.assertEqual(req.as_der(), req4.as_der())
+         self.assertEqual(req.get_version(), 0)
+-        req.set_version(1)
+-        self.assertEqual(req.get_version(), 1)
+         req.set_version(0)
+         self.assertEqual(req.get_version(), 0)
+ 

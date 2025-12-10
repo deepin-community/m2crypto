@@ -1,0 +1,26 @@
+From: Bastian Germann <bage@debian.org>
+Date: Thu, 18 Jul 2024 15:35:06 +0200
+Subject: Expect failure for mktime on i386 only
+
+---
+ tests/test_x509.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+--- a/tests/test_x509.py
++++ b/tests/test_x509.py
+@@ -590,13 +590,13 @@
+                          127614157056681299805556476275995414779)
+ 
+     @unittest.skipIf(platform.system() == 'Windows', 'Skip on Windows. TODO')
+-    @expectedFailureIf(is_32bit() and not is_libc_musl())
++    @expectedFailureIf(is_32bit() and "86" in platform.machine())
+     def test_date_after_2050_working(self):
+         cert = X509.load_cert('tests/bad_date_cert.crt')
+         self.assertEqual(str(cert.get_not_after()), 'Feb  9 14:57:46 2116 GMT')
+ 
+     @unittest.skipIf(platform.system() == 'Windows', 'Skip on Windows. TODO')
+-    @expectedFailureIf(is_32bit() and not is_libc_musl())
++    @expectedFailureIf(is_32bit() and "86" in platform.machine())
+     def test_date_reference_counting(self):
+         """x509_get_not_before() and x509_get_not_after() return internal
+         pointers into X509. As the returned ASN1_TIME objects do not store any

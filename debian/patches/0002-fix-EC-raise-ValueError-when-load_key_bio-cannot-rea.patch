@@ -1,0 +1,30 @@
+From: =?UTF-8?q?Mat=C4=9Bj=20Cepl?= <mcepl@cepl.eu>
+Date: Mon, 14 Oct 2024 08:19:25 +0200
+Subject: [PATCH 2/4] fix[EC]: raise ValueError when load_key_bio() cannot read
+ the file.
+
+Upstream: 83877a3f7630b2ce6144c0b26c98f75ad787fe6e
+
+Fixes: https://todo.sr.ht/~mcepl/m2crypto/363
+---
+ src/M2Crypto/EC.py |    9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+--- a/src/M2Crypto/EC.py
++++ b/src/M2Crypto/EC.py
+@@ -393,7 +393,14 @@ NID_wap_wsg_idm_ecid_wtls12 = m2.NID_wap
+     :param callback: Python callback object that will be invoked
+                      if the EC key pair is passphrase-protected.
+     """
+-    return EC(m2.ec_key_read_bio(bio._ptr(), callback), 1)
++    key = m2.ec_key_read_bio(bio._ptr(), callback)
++    if key is None:
++        raise ValueError(
++            "Cannot read EC key pair from PEM file {}.".format(
++                bio.fname
++            )
++        )
++    return EC(key, 1)
+ 
+ 
+ def load_pub_key(file):

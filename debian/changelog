@@ -1,3 +1,77 @@
+m2crypto (0.42.0-3) unstable; urgency=medium
+
+  * Team upload.
+
+  [ Sebastian Andrzej Siewior ]
+  * tests: Don't pass `-debug' to openssl (closes: #1101045).
+
+  [ Colin Watson ]
+  * Add autopkgtest-dependency on openssl.
+
+ -- Colin Watson <cjwatson@debian.org>  Mon, 24 Mar 2025 12:21:06 +0000
+
+m2crypto (0.42.0-2.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Remove invalid test for X509_REQ_set_version() (Closes: #1085588).
+  * Raise proper error if load_key_bio() fails (Closes: #1091133).
+  * swig workaround: Shadow sys/types.h, discussed in #1091133.
+
+ -- Sebastian Andrzej Siewior <sebastian@breakpoint.cc>  Fri, 10 Jan 2025 12:47:19 +0100
+
+m2crypto (0.42.0-2) unstable; urgency=high
+
+  * Team upload.
+  [ Paul Gevers ]
+  * fix-ssl-timeout-for-t64.patch: reinstate qq in pack().
+    Fixes FTBFS on several archs. Closes: #1085611, #1085589.
+
+ -- Santiago Vila <sanvila@debian.org>  Mon, 21 Oct 2024 11:42:00 +0200
+
+m2crypto (0.42.0-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream version 0.42.0
+  * Refresh patches
+  * Add dep on python3-sphinx-rtd-theme
+
+ -- Alexandre Detiste <tchet@debian.org>  Tue, 20 Aug 2024 18:06:43 +0200
+
+m2crypto (0.41.0+ds-3) unstable; urgency=medium
+
+  * Team upload
+  * Revert "Do not pack time differently for i386 systems"
+  * Fix HTML documentation
+
+ -- Bastian Germann <bage@debian.org>  Fri, 19 Jul 2024 10:50:19 +0200
+
+m2crypto (0.41.0+ds-2) unstable; urgency=medium
+
+  * Expect failure for mktime on i386 only
+
+ -- Bastian Germann <bage@debian.org>  Thu, 18 Jul 2024 16:42:30 +0200
+
+m2crypto (0.41.0+ds-1) unstable; urgency=medium
+
+  * Team upload
+  * Do not expect failure on 32-bit systems with 64-bit time_t
+  * Do not pack time differently for i386 systems
+  * Move source to sr.ht
+  * Exclude doctrees
+  * Drop unnecessary exclusion
+
+ -- Bastian Germann <bage@debian.org>  Thu, 18 Jul 2024 13:35:47 +0200
+
+m2crypto (0.41.0-1) unstable; urgency=medium
+
+  * New upstream version 0.41.0
+  * Adopt package inside DPT (Closes: #1065037)
+  * Apply multiarch hint
+  * Use new dh-sequence-python3
+  * Remove patch applied upstream
+
+ -- Alexandre Detiste <tchet@debian.org>  Sun, 30 Jun 2024 00:04:23 +0200
+
 m2crypto (0.40.1-4) unstable; urgency=medium
 
   [ Simon Quigley ]

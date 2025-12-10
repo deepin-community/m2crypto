@@ -9,11 +9,11 @@ Copyright (c) 1999-2004 Ng Pheng Siong. All rights reserved."""
 import base64
 import socket
 
-from M2Crypto import SSL, six
-from M2Crypto.six.moves.urllib_parse import urlsplit, urlunsplit
-from M2Crypto.six.moves.http_client import *  # noqa
+from M2Crypto import SSL
+from urllib.parse import urlsplit, urlunsplit
+from http.client import *  # noqa
 # This is not imported with just '*'
-from M2Crypto.six.moves.http_client import HTTPS_PORT
+from http.client import HTTPS_PORT
 from typing import Any, AnyStr, Callable, Dict, Optional  # noqa
 
 
@@ -44,7 +44,9 @@ class HTTPSConnection(HTTPConnection):
         self.session = None  # type: bytes
         self.host = host
         self.port = port
-        keys = set(ssl.keys()) - set(('key_file', 'cert_file', 'ssl_context'))
+        keys = set(ssl.keys()) - set(
+            ('key_file', 'cert_file', 'ssl_context')
+        )
         if keys:
             raise ValueError('unknown keyword argument: %s', keys)
         try:
@@ -59,9 +61,9 @@ class HTTPSConnection(HTTPConnection):
         error = None
         # We ignore the returned sockaddr because SSL.Connection.connect needs
         # a host name.
-        for (family, _, _, _, _) in \
-                socket.getaddrinfo(self.host, self.port, 0,
-                                   socket.SOCK_STREAM):
+        for (family, _, _, _, _) in socket.getaddrinfo(
+            self.host, self.port, 0, socket.SOCK_STREAM
+        ):
             sock = None
             try:
                 sock = SSL.Connection(self.ssl_ctx, family=family)
@@ -132,8 +134,15 @@ class ProxyHTTPSConnection(HTTPSConnection):
     _AUTH_HEADER = "Proxy-Authorization"
     _UA_HEADER = "User-Agent"
 
-    def __init__(self, host, port=None, strict=None, username=None,
-                 password=None, **ssl):
+    def __init__(
+        self,
+        host,
+        port=None,
+        strict=None,
+        username=None,
+        password=None,
+        **ssl
+    ):
         # type: (str, Optional[int], Optional[bool], Optional[AnyStr], Optional[AnyStr], **Any) -> None
         """
         Create the ProxyHTTPSConnection object.
@@ -159,13 +168,15 @@ class ProxyHTTPSConnection(HTTPSConnection):
         HTTPSConnection.__init__(self, host, port, strict, **ssl)
 
         self._username = username.encode('utf8') \
-            if isinstance(username, six.string_types) else username
+            if isinstance(username, (str,)) else username
         self._password = password.encode('utf8') \
-            if isinstance(password, six.string_types) else password
+            if isinstance(password, (str,)) else password
         self._proxy_auth = None  # type: str
         self._proxy_UA = None  # type: str
 
-    def putrequest(self, method, url, skip_host=0, skip_accept_encoding=0):
+    def putrequest(
+        self, method, url, skip_host=0, skip_accept_encoding=0
+    ):
         # type: (AnyStr, AnyStr, int, int) -> None
         """
         putrequest is called before connect, so can interpret url and get
@@ -195,8 +206,9 @@ class ProxyHTTPSConnection(HTTPSConnection):
         self._real_host = host  # type: str
         self._real_port = port  # type: int
         rest = urlunsplit(('', '', path, query, fragment))
-        HTTPSConnection.putrequest(self, method, rest, skip_host,
-                                   skip_accept_encoding)
+        HTTPSConnection.putrequest(
+            self, method, rest, skip_host, skip_accept_encoding
+        )
 
     def putheader(self, header, value):
         # type: (AnyStr, AnyStr) -> None
@@ -238,14 +250,26 @@ class ProxyHTTPSConnection(HTTPSConnection):
     def _get_connect_msg(self):
         # type: () -> bytes
         """ Return an HTTP CONNECT request to send to the proxy. """
-        msg = "CONNECT %s:%d HTTP/1.1\r\n" % (self._real_host, self._real_port)
-        msg = msg + "Host: %s:%d\r\n" % (self._real_host, self._real_port)
+        msg = "CONNECT %s:%d HTTP/1.1\r\n" % (
+            self._real_host,
+            self._real_port,
+        )
+        msg = msg + "Host: %s:%d\r\n" % (
+            self._real_host,
+            self._real_port,
+        )
         if self._proxy_UA:
-            msg = msg + "%s: %s\r\n" % (self._UA_HEADER, self._proxy_UA)
+            msg = msg + "%s: %s\r\n" % (
+                self._UA_HEADER,
+                self._proxy_UA,
+            )
         if self._proxy_auth:
-            msg = msg + "%s: %s\r\n" % (self._AUTH_HEADER, self._proxy_auth)
+            msg = msg + "%s: %s\r\n" % (
+                self._AUTH_HEADER,
+                self._proxy_auth,
+            )
         msg = msg + "\r\n"
-        return six.ensure_binary(msg)
+        return msg.encode()
 
     def _start_ssl(self):
         # type: () -> None
@@ -265,4 +289,4 @@ class ProxyHTTPSConnection(HTTPSConnection):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", DeprecationWarning)
             enc_userpass = base64.encodestring(userpass).replace("\n", "")
-        return six.ensure_binary("Basic %s" % enc_userpass)
+        return ("Basic %s" % enc_userpass).encode()
